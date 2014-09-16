@@ -3,6 +3,7 @@
 
 import os
 import time
+import glob
 
 new_header = '''#!/usr/bin/env python
 # encoding: utf-8
@@ -27,7 +28,7 @@ new_header = '''#!/usr/bin/env python
 
 repo_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-for f in [ repo_path + '/rb' + glob.glob('%s/rbootstrap/*.py' % repo_path):
+for f in [ repo_path + '/rb' ] + glob.glob('%s/rbootstrap/*.py' % repo_path):
     new = [ new_header ]
 
     first_code_line_found = False
