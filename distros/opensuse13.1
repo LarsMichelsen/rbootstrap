@@ -1,0 +1,122 @@
+
+# The default mirror to use
+mirror = 'http://ftp4.gwdg.de/pub/opensuse/distribution/13.1/repo/oss'
+
+# Packages to install
+packages = [
+    # What we want
+    'zypper', 'openSUSE-release', 'openSUSE-build-key', 'time', 'pwdutils',
+    # Needed to resolve multiple providers
+    'krb5-mini', 'openSUSE-release-ftp', 'systemd-presets-branding-openSUSE', 'cracklib-dict-small',
+    'module-init-tools', 'systemd-sysvinit',
+]
+
+# Possible architectures
+architectures = [
+    'amd64',
+    'i386',
+]
+
+def init_passwd():
+    write_file('/etc/passwd', '''root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/bin/bash
+daemon:x:2:2:Daemon:/sbin:/bin/bash
+lp:x:4:7:Printing daemon:/var/spool/lpd:/bin/bash
+mail:x:8:12:Mailer daemon:/var/spool/clientmqueue:/bin/false
+games:x:12:100:Games account:/var/games:/bin/bash
+wwwrun:x:30:8:WWW daemon apache:/var/lib/wwwrun:/bin/false
+ftp:x:40:49:FTP account:/srv/ftp:/bin/bash
+nobody:x:65534:65533:nobody:/var/lib/nobody:/bin/bash
+messagebus:*:100:101:User for D-Bus:/var/run/dbus:/bin/false
+haldaemon:*:101:102:User for haldaemon:/var/run/hald:/bin/false
+sshd:*:71:65:SSH daemon:/var/lib/sshd:/bin/false
+man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
+news:x:9:13:News system:/etc/news:/bin/bash
+uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
+uuidd:x:102:104:User for uuidd:/var/run/uuidd:/bin/false
+postfix:x:51:51:Postfix Daemon:/var/spool/postfix:/bin/false
+polkituser:x:103:105:PolicyKit:/var/run/PolicyKit:/bin/false
+suse-ncc:x:104:106:Novell Customer Center User:/var/lib/YaST2/suse-ncc-fakehome:/bin/bash
+avahi:x:105:107:User for Avahi:/var/run/avahi-daemon:/bin/false''')
+
+def init_group():
+    write_file('/etc/group', '''root:x:0:
+bin:x:1:daemon
+daemon:x:2:
+sys:x:3:
+tty:x:5:
+disk:x:6:
+lp:x:7:
+www:x:8:
+kmem:x:9:
+wheel:x:10:
+mail:x:12:
+news:x:13:
+uucp:x:14:
+shadow:x:15:
+dialout:x:16:
+audio:x:17:
+floppy:x:19:
+cdrom:x:20:
+console:x:21:
+utmp:x:22:
+public:x:32:
+video:x:33:
+games:x:40:
+xok:x:41:
+trusted:x:42:
+modem:x:43:
+ftp:x:49:
+man:x:62:
+users:x:100:
+nobody:x:65533:
+nogroup:x:65534:nobody
+messagebus:!:101:
+haldaemon:!:102:
+sshd:!:65:
+tape:!:103:
+uuidd:!:104:
+postfix:!:51:
+maildrop:!:59:
+polkituser:!:105:
+suse-ncc:!:106:
+avahi:!:107:''')
+
+def init_shadow():
+    write_file('/etc/shadow', '''root:*:15898::::::
+bin:*:15870::::::
+daemon:*:15870::::::
+lp:*:15870::::::
+mail:*:15870::::::
+news:*:15870::::::
+uucp:*:15870::::::
+games:*:15870::::::
+man:*:15870::::::
+wwwrun:*:15870::::::
+ftp:*:15870::::::
+nobody:*:15870::::::
+messagebus:*:15870:0::7:::
+haldaemon:*:15870:0::7:::
+uuidd:*:15898:0:99999:7:::
+postfix:*:15898:0:99999:7:::
+polkituser:*:15898:0:99999:7:::
+suse-ncc:*:15898:0:99999:7:::
+avahi:*:16318:0:99999:7:::''')
+    chown('/etc/shadow', 'root', 'shadow')
+    chmod('/etc/shadow', 0640)
+
+def zypper_add_repo():
+    execute_jailed('zypper -q ar %s repo-oss' % mirror)
+
+def zypper_enforce_architecture():
+    new_data = re.sub('#?\s?arch = [a-z0-9_-]+', 'arch = %s' % config.arch, read_file('/etc/zypp/zypp.conf'))
+    write_file('/etc/zypp/zypp.conf', new_data, force = True)
+
+def hook_post_init():
+    init_passwd()
+    init_group()
+    init_shadow()
+
+def hook_post_unpack():
+    zypper_add_repo()
+    zypper_enforce_architecture()
