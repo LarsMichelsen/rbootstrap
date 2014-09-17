@@ -28,23 +28,29 @@ from .exceptions import *
 codename    = None
 arch        = 'amd64'
 root        = None
-tmp_dir     = 'rb.tmp'
-distro_path = '/usr/share/rbootstrap/distros'
+tmp_dir     = 'rb.tmp' # must be within root
+# FIXME:
+#distro_path = '/usr/share/rbootstrap/distros'
+distro_path = 'distros'
 
-def load(path = '/etc/rbootstrap.conf'):
+def load():
     """ Load the specified configuration file """
-    # FIXME: Use other config format
-    try:
-        execfile(path, globals(), globals())
-    except:
-        raise RBError('Unable to read config file "%s": %s\n' % (path, e))
+
+    # Now use the command line options to override values from the config
+    for key, val in opts.values():
+        globals()[key] = val
 
     # Now resolve paths to really be absolute
     for key in [ 'root', 'distro_path' ]:
         globals()[key] = os.path.abspath(globals()[key])
 
+def set_opts(options):
+    global opts
+    opts = options
+
 def distros():
-    return os.listdir(distro_path)
+    return [ f for f in os.listdir(distro_path)
+             if f[0] != '.' ]
 
 def package_architectures():
     if arch == 'amd64':
