@@ -60,7 +60,10 @@ def help(msg = None):
         'OPTIONS:\n'
         '    --list-codenames Prints out a list of supported Linux distributions\n'
         '\n'
-        '    --arch           Set the architecture to install (default: Same as host OS)\n'
+        '    --arch           Set the architecture to install (default: amd64)\n'
+        '                     The possible options depend on the architecures supported\n'
+        '                     by the distribution to be installed into the jail. Most\n'
+        '                     support "amd64" and "i386".\n'
         '    --include        Add these package names to the list of packages to\n'
         '                     be installed\n'
         '    --exclude        Remove these package names from the list of packages to\n'
@@ -187,6 +190,9 @@ try:
     main()
 except BailOut, e:
     sys.stderr.write('%s. Terminating!\n' % e)
+    sys.exit(1)
+except RBError, e:
+    sys.stderr.write('ERROR: %s\n' % e)
     sys.exit(1)
 except Exception, e:
     sys.stderr.write('Unhandled exception: %s\n' % traceback.format_exc())

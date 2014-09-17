@@ -2,6 +2,7 @@
 mirror = 'http://ftp4.gwdg.de/pub/opensuse/distribution/13.1/repo/oss'
 
 # Packages to install
+# FIXME: Check whether or not these are really needed
 packages = [
     # What we want
     'zypper', 'openSUSE-release', 'openSUSE-build-key', 'time', 'pwdutils',
@@ -111,7 +112,7 @@ def zypper_enforce_architecture():
     new_data = re.sub('#?\s?arch = [a-z0-9_-]+', 'arch = %s' % config.arch, read_file('/etc/zypp/zypp.conf'))
     write_file('/etc/zypp/zypp.conf', new_data, force = True)
 
-def hook_post_init():
+def hook_pre_init():
     init_passwd()
     init_group()
     init_shadow()

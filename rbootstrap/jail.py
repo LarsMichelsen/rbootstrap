@@ -38,8 +38,9 @@ class Jail(object):
             if not os.path.exists(path):
                 os.makedirs(path)
 
-        chown('/', 'root', 'root')
+        chown('/', 'root', 'root', jailed=False)
 
+        distro.execute_hooks('pre_init')
         copy_file('/etc/resolv.conf')
         copy_file('/etc/hostname')
         self.setup_devices()
@@ -53,7 +54,7 @@ class Jail(object):
         for path, perm, major, minor, user, group in [
             ('console',  0600|stat.S_IFCHR, 5,  1, 'root', 'tty'),
             ('full',     0666|stat.S_IFCHR, 1,  7, 'root', 'root'),
-            ('kmem',     0600|stat.S_IFCHR, 1,  2, 'root', 'shadow'),
+            ('kmem',     0640|stat.S_IFCHR, 1,  2, 'root', 'kmem'),
             ('loop0',    0660|stat.S_IFBLK, 7,  0, 'root', 'disk'),
             ('loop1',    0660|stat.S_IFBLK, 7,  1, 'root', 'disk'),
             ('loop2',    0660|stat.S_IFBLK, 7,  2, 'root', 'disk'),
@@ -92,7 +93,7 @@ class Jail(object):
             dest_path = os.path.join(self._path, 'dev', path)
             if not os.path.exists(dest_path):
                 os.mknod(dest_path, perm, os.makedev(major, minor))
-                chown(os.path.join('dev', path), user, group)
+                chown(os.path.join('/dev', path), user, group)
         os.umask(old_umask)
 
     def setup_proc(self):

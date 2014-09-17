@@ -44,15 +44,34 @@ def copy_file(path):
     if not os.path.exists(dest_path):
         file(dest_path, 'w').write(file(path).read())
 
+def call_jailed(handler, *args):
+    """ Execute a python function "jailed". Means chroot into the jail path
+    and unchroot afterwards """
+    root = os.open('/', os.O_RDONLY)
+    os.chroot(config.root)
+    os.chdir('/')
+
+    handler(*args)
+
+    os.fchdir(root)
+    os.chroot('.')
+    os.chdir('/')
+
 def execute_jailed(cmd):
     """ Executes a command within the context of the jail """
     os.system('chroot %s %s' % (config.root, cmd))
 
-def chown(path, user, group):
+def _chown_jailed(path, user, group):
+    os.chown(path, pwd.getpwnam(user).pw_uid, grp.getgrnam(group).gr_gid)
+
+def chown(path, user, group, jailed = True):
     """ Changes ownership of a path within the context of the jail """
-    os.chown(os.path.join(config.root, path),
-        pwd.getpwnam(user).pw_uid, grp.getgrnam(group).gr_gid)
+    if jailed:
+        call_jailed(_chown_jailed, path, user, group)
+    else:
+        os.chown(os.path.join(config.root, path[1:]),
+            pwd.getpwnam(user).pw_uid, grp.getgrnam(group).gr_gid)
 
 def chmod(path, mode):
     """ Changes permissions of a path within the context of the jail """
-    os.chmod(os.path.join(config.root, path), mode)
+    os.chmod(os.path.join(config.root, path[1:]), mode)

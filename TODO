@@ -1,0 +1,16 @@
+A collection of short notes on what to do one day.
+
+* Care about output (Logging / Output / Verbose logging)
+* Add output or example to manpage which commands to
+  use to use the chroot jail properly (mount, chroot, ...)
+* Check GPG keys
+* Handle multiple repositories
+* Add support for distros
+  * SLES
+  * RedHat
+  * CentOS
+  * Fedora
+* Add mode where dependency tree of packages is visualized
+  (Would be helpful for adding new distros)
+* Add some tests
+* Add man page
