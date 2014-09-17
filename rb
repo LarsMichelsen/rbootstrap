@@ -24,6 +24,7 @@ import os
 import sys
 import glob
 import getopt
+import atexit
 import traceback
 
 from rbootstrap import repo, jail, config, distro
@@ -64,6 +65,19 @@ def help(msg = None):
         '                     be installed\n'
         '    --exclude        Remove these package names from the list of packages to\n'
         '                     be installed\n'
+        '    --pre-erase      Completely clear all data in TARGET before setting it up.\n'
+        '                     When the jail is still used by mounted filesystems or\n'
+        '                     running processes rbootstrap will terminate with an\n'
+        '                     error message.\n'
+        '                     If you like to perform a forced erasement, use the flag\n'
+        '                     "--force-erase" together with this option.\n'
+        '                     BE CAREFUL: When you point TARGET to another directory\n'
+        '                     than the jail, the data below this directory will be\n'
+        '                     removed anyways.\n'
+        '    --force-erase    Use this to make "--pre-erase" make the jail unused.\n'
+        '                     This means:\n'
+        '                     a) Killing all processes accessing files of the jail\n'
+        '                     b) Unmounting all filesystems mounted in the jail\n'
         '    --verbose        Print out details about actions to stdout\n'
         '\n'
         '    -V, --version    Print out version information\n'
@@ -80,7 +94,7 @@ def list_codenames():
 def parse_opts():
     short_options = ['hV']
     long_options  = ['help', 'version', 'arch', 'include', 'exclude', 'verbose',
-                     'list-codenames']
+                     'list-codenames', 'pre-erase', 'force-erase']
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
     except getopt.GetoptError, e:
@@ -97,8 +111,10 @@ def parse_opts():
             options['exclude'] = v.split(',')
         elif k == '--verbose':
             options['verbose'] = v
-        elif k == '--verbose':
-            options['verbose'] = v
+        elif k == '--pre-erase':
+            options['pre_erase'] = True
+        elif k == '--force-erase':
+            options['force_erase'] = True
         elif k == '--list-codenames':
             list_codenames()
         elif k in ['-V', '--version']:
@@ -133,20 +149,28 @@ def main():
         raise BailOut('The requested architecture %s is not supported by %s' %
                                                     (config.arch, config.codename))
 
-    REPO = repo.Repository(distro.mirror_path(), config.package_architectures())
-
     #
     # PHASE 1: Initialize the jail with some basic things like directories etc.
     #
 
     JAIL = jail.Jail(config.root)
-    JAIL.erase()
+
+    # Register final cleanup of the jail to be left as plain directory in all cases.
+    atexit.register(JAIL.cleanup)
+
+    if config.pre_erase:
+        JAIL.erase()
     JAIL.init()
 
+    #
+    # PHASE 2: Now access the package repository and use it to resolve all needed packages
+    #
+
+    REPO = repo.Repository(distro.mirror_path(), config.package_architectures())
     install_packages = REPO.resolve_needed_packages(distro.needed_packages())
 
     #
-    # PHASE 2: Populate the jail with some basic files to make execution of the
+    # PHASE 3: Populate the jail with some basic files to make execution of the
     #          package manager in a chrooted environment posible.
     #
 
@@ -154,17 +178,10 @@ def main():
     JAIL.unpack(install_packages)
 
     #
-    # PHASE 3: Perform regular installation of all components (replacing stuff of PHASE 2).
+    # PHASE 4: Perform regular installation of all components (replacing stuff of PHASE 2).
     #
 
     JAIL.install(install_packages)
-
-    #
-    # PHASE 4: Cleanup jail to be left as plain directory.
-    #
-
-    JAIL.cleanup()
-    #FIXME: On exception verify to unmount everything
 
 try:
     main()

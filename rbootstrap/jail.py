@@ -127,6 +127,9 @@ class Jail(object):
         if not os.path.exists(self._path):
             return
 
+        if config.force_erase:
+            self.cleanup() # Only cleanup resources when configured
+
         if self.get_mounts():
             raise RBError('Can not be erased. There are still file systems mounted within the jail.')
 

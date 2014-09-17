@@ -32,12 +32,14 @@ tmp_dir     = 'rb.tmp' # must be within root
 # FIXME:
 #distro_path = '/usr/share/rbootstrap/distros'
 distro_path = 'distros'
+pre_erase   = False
+force_erase = False
 
 def load():
     """ Load the specified configuration file """
 
     # Now use the command line options to override values from the config
-    for key, val in opts.values():
+    for key, val in opts.items():
         globals()[key] = val
 
     # Now resolve paths to really be absolute
