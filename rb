@@ -59,8 +59,6 @@ def help(msg = None):
         '                     chroot jail in. This path might already be existant.\n'
         '\n'
         'OPTIONS:\n'
-        '    --list-codenames Prints out a list of supported Linux distributions\n'
-        '\n'
         '    --arch=ARCH      Set the architecture to install (default: x86_64)\n'
         '                     The possible options depend on the architecures supported\n'
         '                     by the distribution to be installed into the jail. Most\n'
@@ -85,6 +83,9 @@ def help(msg = None):
         '                     b) Unmounting all filesystems mounted in the jail\n'
         '    --verbose        Print out details about actions to stdout\n'
         '\n'
+        '    --list-codenames Prints out a list of supported Linux distributions\n'
+        '    --print-pkgs     Print the packages to be installed, then exit\n'
+        '\n'
         '    -V, --version    Print out version information\n'
         '    -h, --help       Print this help screen\n'
         '\n'
@@ -92,14 +93,14 @@ def help(msg = None):
     sys.exit(0)
 
 def list_codenames():
-    sys.stdout.write('Supported Linux Distributions:\n%s\n' %
+    log('Supported Linux Distributions:\n%s\n' %
        '\n'.join([ '    %s' % d for d in config.distros() ]))
     sys.exit(0)
 
 def parse_opts():
     short_options = ['hV']
     long_options  = ['help', 'version', 'arch=', 'include=', 'exclude=', 'verbose',
-                     'list-codenames', 'pre-erase', 'force-erase']
+                     'list-codenames', 'pre-erase', 'force-erase', 'print-pkgs', ]
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
     except getopt.GetoptError, e:
@@ -120,11 +121,16 @@ def parse_opts():
             options['pre_erase'] = True
         elif k == '--force-erase':
             options['force_erase'] = True
+        elif k == '--print-pkgs':
+            options['only_print_pkgs'] = True
+
         elif k == '--list-codenames':
             list_codenames()
+
         elif k in ['-V', '--version']:
             sys.stdout.write(version())
             sys.exit(0)
+
         elif k in ['-h', '--help']:
             sys.stdout.write(help())
 
@@ -158,14 +164,15 @@ def main():
     # PHASE 1: Initialize the jail with some basic things like directories etc.
     #
 
-    JAIL = jail.Jail(config.root)
+    if not config.only_print_pkgs:
+        JAIL = jail.Jail(config.root)
 
-    # Register final cleanup of the jail to be left as plain directory in all cases.
-    atexit.register(JAIL.cleanup)
+        # Register final cleanup of the jail to be left as plain directory in all cases.
+        atexit.register(JAIL.cleanup)
 
-    if config.pre_erase:
-        JAIL.erase()
-    JAIL.init()
+        if config.pre_erase:
+            JAIL.erase()
+        JAIL.init()
 
     #
     # PHASE 2: Now access the package repository and use it to resolve all needed packages
@@ -173,6 +180,11 @@ def main():
 
     REPO = repo.Repository(distro.mirror_path(), distro.gpgkey_path(), config.package_architectures())
     install_packages = REPO.resolve_needed_packages(distro.needed_packages())
+
+    if config.only_print_pkgs:
+        step('To be installed')
+        log(''.join([ '    %s\n' % p[0] for p in install_packages ]))
+        sys.exit(0)
 
     #
     # PHASE 3: Populate the jail with some basic files to make execution of the

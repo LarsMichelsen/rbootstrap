@@ -37,6 +37,7 @@ force_erase = False
 include     = []
 exclude     = []
 verbose     = False
+only_print_pkgs = False
 
 def load():
     """ Load the specified configuration file """
