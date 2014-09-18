@@ -26,7 +26,7 @@ from .exceptions import *
 # Hardcoded default configuration which can be overwritten by configuration
 # files and/or command line options
 codename    = None
-arch        = 'amd64'
+arch        = 'x86_64'
 root        = None
 tmp_dir     = 'rb.tmp' # must be within root
 # FIXME:
@@ -34,6 +34,8 @@ tmp_dir     = 'rb.tmp' # must be within root
 distro_path = 'distros'
 pre_erase   = False
 force_erase = False
+include     = []
+exclude     = []
 
 def load():
     """ Load the specified configuration file """
@@ -55,7 +57,7 @@ def distros():
              if f[0] != '.' ]
 
 def package_architectures():
-    if arch == 'amd64':
+    if arch == 'x86_64':
         return ['x86_64', 'noarch']
     else:
         return ['i586', 'i686', 'noarch']

@@ -60,13 +60,14 @@ def help(msg = None):
         'OPTIONS:\n'
         '    --list-codenames Prints out a list of supported Linux distributions\n'
         '\n'
-        '    --arch           Set the architecture to install (default: amd64)\n'
+        '    --arch=ARCH      Set the architecture to install (default: x86_64)\n'
         '                     The possible options depend on the architecures supported\n'
         '                     by the distribution to be installed into the jail. Most\n'
-        '                     support "amd64" and "i386".\n'
-        '    --include        Add these package names to the list of packages to\n'
-        '                     be installed\n'
-        '    --exclude        Remove these package names from the list of packages to\n'
+        '                     support "x86_64" and "i386".\n'
+        '    --include=A,B,C  The packages specified here will be installed using the\n'
+        '                     package manager after the initial installation has been\n'
+        '                     finished.\n'
+        '    --exclude=A,B,C  Remove these package names from the list of packages to\n'
         '                     be installed\n'
         '    --pre-erase      Completely clear all data in TARGET before setting it up.\n'
         '                     When the jail is still used by mounted filesystems or\n'
@@ -96,7 +97,7 @@ def list_codenames():
 
 def parse_opts():
     short_options = ['hV']
-    long_options  = ['help', 'version', 'arch', 'include', 'exclude', 'verbose',
+    long_options  = ['help', 'version', 'arch=', 'include=', 'exclude=', 'verbose',
                      'list-codenames', 'pre-erase', 'force-erase']
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
@@ -169,7 +170,7 @@ def main():
     # PHASE 2: Now access the package repository and use it to resolve all needed packages
     #
 
-    REPO = repo.Repository(distro.mirror_path(), config.package_architectures())
+    REPO = repo.Repository(distro.mirror_path(), distro.gpgkey_path(), config.package_architectures())
     install_packages = REPO.resolve_needed_packages(distro.needed_packages())
 
     #
@@ -177,6 +178,7 @@ def main():
     #          package manager in a chrooted environment posible.
     #
 
+    REPO.download_gpgkey()
     REPO.download_packages(install_packages)
     JAIL.unpack(install_packages)
 

@@ -30,6 +30,9 @@ class Jail(object):
     def __init__(self, path):
         self._path = path
 
+        if self._path == '/':
+            raise RBError('Won\'t continue. "/" as chroot target seems strange.')
+
     def init(self):
         """ Perform some initializations of the jail, for example creating
         device nodes below /dev or mount the /proc filesystem. """
@@ -160,11 +163,21 @@ class Jail(object):
 
     def install(self, packages):
         distro.execute_hooks('pre_install')
+
+        if distro.gpgkey_path():
+            execute_jailed('rpm --import %s' % os.path.join(config.tmp_dir, 'gpg.key'))
+
+        # Now install the packages again to fix file permissions and make all pre/post
+        # being executed
         packages = [
             os.path.join(config.tmp_dir, pkg_loc.split('/')[-1])
             for pkg_name, pkg_loc in packages
         ]
         execute_jailed('rpm -ivh %s' % ' '.join(packages))
+
+        if config.include:
+            distro.install_packages(config.include)
+
         distro.execute_hooks('post_install')
 
     def cleanup(self):

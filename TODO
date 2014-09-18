@@ -1,10 +1,11 @@
 A collection of short notes on what to do one day.
 
-* Prevent "/" as chroot
+* Check if already existing RPMs need to be re-downloaded
 * Care about output (Logging / Output / Verbose logging)
 * Add output or example to manpage which commands to
   use to use the chroot jail properly (mount, chroot, ...)
-* Check GPG keys
+* handle exit codes of system commands
+* Check downloaded RPMs signatures
 * Handle multiple repositories
 * Add support for distros
   * SLES

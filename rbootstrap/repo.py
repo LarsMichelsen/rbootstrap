@@ -60,8 +60,9 @@ def ns(name, key):
     return '{http://linux.duke.edu/metadata/%s}%s' % (name, key)
 
 class Repository(object):
-    def __init__(self, mirror_path, allowed_arch):
+    def __init__(self, mirror_path, gpgkey_path, allowed_arch):
         self._mirror_path  = mirror_path
+        self._gpgkey_path  = gpgkey_path
         self._allowed_arch = allowed_arch
 
         self._get_data_path()
@@ -115,6 +116,16 @@ class Repository(object):
         needed_pkg_elems = []
         already_provided = []
         needed_pkgs      = set([])
+
+        # Maybe the user configured to skipping packages which are requested
+        # by the distribution specification
+        if config.exclude:
+            needed = needed[:] # do not modify the original list
+            for pkg in config.exclude:
+                try:
+                    needed.remove(pkg)
+                except ValueError:
+                    pass
 
         # First get
         # a) the things each package provides for later dependency resolving
@@ -174,11 +185,22 @@ class Repository(object):
 
         return needed_pkgs
 
-    def download_packages(self, packages):
+    def _tmp_path(self):
         tmp_path = os.path.join(config.root, config.tmp_dir)
         if not os.path.exists(tmp_path):
             os.mkdir(tmp_path)
+        return tmp_path
 
+    def download_gpgkey(self):
+        if not self._gpgkey_path:
+            return
+
+        tmp_path = self._tmp_path()
+        with open(os.path.join(tmp_path, 'gpg.key'), 'wb') as fp:
+            shutil.copyfileobj(fetch(self._gpgkey_path), fp)
+
+    def download_packages(self, packages):
+        tmp_path = self._tmp_path()
         for pkg_name, pkg_loc in packages:
             pkg_filename = os.path.basename(pkg_loc)
             pkg_path = os.path.join(self._data_path, pkg_loc)

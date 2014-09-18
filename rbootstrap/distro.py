@@ -24,8 +24,16 @@ import re
 from . import config
 from .utils import *
 
+gpgkey = None
+
 def load(codename):
     execfile(os.path.join(config.distro_path, codename), globals(), globals())
+
+    # Verify that the distro registers all needed things
+    for key in [ 'architectures', 'packages', 'mirror', 'install_packages' ]:
+        if key not in globals():
+            raise BailOut('The distro "%s" does not specify the required key %s' %
+                                                                    (codename, key))
 
 def supported_architectures():
     return architectures
@@ -35,6 +43,9 @@ def needed_packages():
 
 def mirror_path():
     return mirror
+
+def gpgkey_path():
+    return gpgkey
 
 def execute_hooks(what):
     if 'hook_' + what in globals():
