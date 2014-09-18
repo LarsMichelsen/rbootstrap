@@ -1,5 +1,6 @@
 A collection of short notes on what to do one day.
 
+* Prevent "/" as chroot
 * Care about output (Logging / Output / Verbose logging)
 * Add output or example to manpage which commands to
   use to use the chroot jail properly (mount, chroot, ...)
@@ -14,3 +15,4 @@ A collection of short notes on what to do one day.
   (Would be helpful for adding new distros)
 * Add some tests
 * Add man page
+* Add bash completion for distros

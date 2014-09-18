@@ -1,11 +1,10 @@
 # The default mirror to use
-mirror = 'http://ftp4.gwdg.de/pub/opensuse/distribution/13.1/repo/oss'
+mirror = 'http://download.opensuse.org/distribution/13.1/repo/oss/'
 
 # Packages to install
-# FIXME: Check whether or not these are really needed
 packages = [
     # What we want
-    'zypper', 'openSUSE-release', 'openSUSE-build-key', 'time', 'pwdutils',
+    'zypper', 'openSUSE-release', 'openSUSE-build-key', 'time',
     # Needed to resolve multiple providers
     'krb5-mini', 'openSUSE-release-ftp', 'systemd-presets-branding-openSUSE', 'cracklib-dict-small',
     'module-init-tools', 'systemd-sysvinit',
@@ -23,21 +22,14 @@ bin:x:1:1:bin:/bin:/bin/bash
 daemon:x:2:2:Daemon:/sbin:/bin/bash
 lp:x:4:7:Printing daemon:/var/spool/lpd:/bin/bash
 mail:x:8:12:Mailer daemon:/var/spool/clientmqueue:/bin/false
+news:x:9:13:News system:/etc/news:/bin/bash
+uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
 games:x:12:100:Games account:/var/games:/bin/bash
+man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
 wwwrun:x:30:8:WWW daemon apache:/var/lib/wwwrun:/bin/false
 ftp:x:40:49:FTP account:/srv/ftp:/bin/bash
 nobody:x:65534:65533:nobody:/var/lib/nobody:/bin/bash
-messagebus:*:100:101:User for D-Bus:/var/run/dbus:/bin/false
-haldaemon:*:101:102:User for haldaemon:/var/run/hald:/bin/false
-sshd:*:71:65:SSH daemon:/var/lib/sshd:/bin/false
-man:x:13:62:Manual pages viewer:/var/cache/man:/bin/bash
-news:x:9:13:News system:/etc/news:/bin/bash
-uucp:x:10:14:Unix-to-Unix CoPy system:/etc/uucp:/bin/bash
-uuidd:x:102:104:User for uuidd:/var/run/uuidd:/bin/false
-postfix:x:51:51:Postfix Daemon:/var/spool/postfix:/bin/false
-polkituser:x:103:105:PolicyKit:/var/run/PolicyKit:/bin/false
-suse-ncc:x:104:106:Novell Customer Center User:/var/lib/YaST2/suse-ncc-fakehome:/bin/bash
-avahi:x:105:107:User for Avahi:/var/run/avahi-daemon:/bin/false''')
+messagebus:!:499:499:User for D-Bus:/run/dbus:/bin/false''')
 
 def init_group():
     write_file('/etc/group', '''root:x:0:
@@ -67,41 +59,30 @@ xok:x:41:
 trusted:x:42:
 modem:x:43:
 ftp:x:49:
+lock:x:54:
 man:x:62:
 users:x:100:
 nobody:x:65533:
 nogroup:x:65534:nobody
-messagebus:!:101:
-haldaemon:!:102:
-sshd:!:65:
-tape:!:103:
-uuidd:!:104:
-postfix:!:51:
-maildrop:!:59:
-polkituser:!:105:
-suse-ncc:!:106:
-avahi:!:107:''')
+messagebus:x:499:
+tape:x:497:
+systemd-journal:x:495:''')
 
 def init_shadow():
-    write_file('/etc/shadow', '''root:*:15898::::::
-bin:*:15870::::::
-daemon:*:15870::::::
-lp:*:15870::::::
-mail:*:15870::::::
-news:*:15870::::::
-uucp:*:15870::::::
-games:*:15870::::::
-man:*:15870::::::
-wwwrun:*:15870::::::
-ftp:*:15870::::::
-nobody:*:15870::::::
-messagebus:*:15870:0::7:::
-haldaemon:*:15870:0::7:::
-uuidd:*:15898:0:99999:7:::
-postfix:*:15898:0:99999:7:::
-polkituser:*:15898:0:99999:7:::
-suse-ncc:*:15898:0:99999:7:::
-avahi:*:16318:0:99999:7:::''')
+    write_file('/etc/shadow', '''root:*:16331::::::
+bin:*:16015::::::
+daemon:*:16015::::::
+lp:*:16015::::::
+mail:*:16015::::::
+news:*:16015::::::
+uucp:*:16015::::::
+games:*:16015::::::
+man:*:16015::::::
+wwwrun:*:16015::::::
+ftp:*:16015::::::
+nobody:*:16015::::::
+messagebus:!:16015::::::
+''')
     chown('/etc/shadow', 'root', 'shadow')
     chmod('/etc/shadow', 0640)
 
