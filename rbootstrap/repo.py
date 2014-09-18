@@ -32,6 +32,7 @@ except ImportError:
     import cElementTree as elem_tree
 
 from . import config
+from .log import *
 from .exceptions import *
 
 def fetch(path):
@@ -64,6 +65,9 @@ class Repository(object):
         self._mirror_path  = mirror_path
         self._gpgkey_path  = gpgkey_path
         self._allowed_arch = allowed_arch
+
+        step('Reading repository meta information')
+        verbose('Repository: %s\nPackage Architectures: %s' % (self._mirror_path, ', '.join(self._allowed_arch)))
 
         self._get_data_path()
         self._get_primary_path()
@@ -117,6 +121,9 @@ class Repository(object):
         already_provided = []
         needed_pkgs      = set([])
 
+        step('Resolving package dependencies')
+        verbose('Requested packages:\n%s' % ''.join([ '    %s\n' % p for p in needed ]))
+
         # Maybe the user configured to skipping packages which are requested
         # by the distribution specification
         if config.exclude:
@@ -147,7 +154,7 @@ class Repository(object):
             if pkg_name in needed:
                 needed_pkg_elems.append(pkg)
 
-        def add_with_required(pkg):
+        def add_with_required(pkg, lvl = 0):
             pkg_name = pkg.find(ns('common', 'name')).text
             pkg_loc  = pkg.find(ns('common', 'location')).get('href')
             if (pkg_name, pkg_loc) not in needed_pkgs:
@@ -157,6 +164,8 @@ class Repository(object):
             fmt = pkg.find(ns('common', 'format'))
             require_elements = fmt.find(ns('rpm', 'requires'))
             if require_elements:
+                if lvl == 0:
+                    verbose((' ' * lvl) + pkg_name)
                 for entry in require_elements.findall(ns('rpm', 'entry')):
                     required = entry.get('name')
 
@@ -170,16 +179,19 @@ class Repository(object):
                         # In case there are multiple, but one is in needed, use this one!
                         for provider_name, provider_elem in add_pkgs:
                             if provider_name in needed:
-                                add_with_required(provider_elem)
+                                verbose((' ' * lvl) + '+ %s' % provider_name)
+                                add_with_required(provider_elem, lvl+1)
                                 break
                         else:
                             raise RBError('Got multiple providers for "%s": %s' % (required, ', '.join(
                                 [ '%s(%s)' % (p[0], p[1].find(ns('common', 'arch')).text) for p in add_pkgs])))
                     else:
                         provider_name, provider_elem = add_pkgs[0]
-                        add_with_required(provider_elem)
+                        verbose((' ' * lvl) + '+ %s' % provider_name)
+                        add_with_required(provider_elem, lvl+1)
 
         # Now loop all needed packages and resolve their requirements
+        verbose('Resolving...')
         for pkg in needed_pkg_elems:
             add_with_required(pkg)
 
@@ -194,16 +206,23 @@ class Repository(object):
     def download_gpgkey(self):
         if not self._gpgkey_path:
             return
-
         tmp_path = self._tmp_path()
+
+        step('Loading repositories GPG key')
+        verbose('Destination: %s' % tmp_path)
+
         with open(os.path.join(tmp_path, 'gpg.key'), 'wb') as fp:
             shutil.copyfileobj(fetch(self._gpgkey_path), fp)
 
     def download_packages(self, packages):
         tmp_path = self._tmp_path()
+
+        step('Loading packages')
+        verbose('Destination: %s' % tmp_path)
         for pkg_name, pkg_loc in packages:
             pkg_filename = os.path.basename(pkg_loc)
             pkg_path = os.path.join(self._data_path, pkg_loc)
 
             with open(os.path.join(tmp_path, pkg_filename), 'wb') as fp:
+                verbose('Loading %s' % pkg_filename)
                 shutil.copyfileobj(fetch(pkg_path), fp)

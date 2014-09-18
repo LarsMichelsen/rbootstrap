@@ -23,6 +23,7 @@ import stat
 import shutil
 
 from . import distro, config
+from .log import *
 from .utils import *
 from .exceptions import *
 
@@ -36,6 +37,7 @@ class Jail(object):
     def init(self):
         """ Perform some initializations of the jail, for example creating
         device nodes below /dev or mount the /proc filesystem. """
+        step('Initializing jail')
         for d in [ 'dev', 'etc', 'proc' ]:
             path = os.path.join(self._path, d)
             if not os.path.exists(path):
@@ -51,6 +53,7 @@ class Jail(object):
         distro.execute_hooks('post_init')
 
     def setup_devices(self):
+        step('Creating device nodes')
         # Prevent problems when creating files with os.mknod(), which uses
         # mknod(2) of the system which takes care about the umask of this process.
         old_umask = os.umask(0)
@@ -100,6 +103,7 @@ class Jail(object):
         os.umask(old_umask)
 
     def setup_proc(self):
+        step('Mounting needed filesystems')
         os.system('mount -t proc proc %s/proc' % self._path)
         # FIXME: Maybe mount /sys
 
@@ -130,6 +134,7 @@ class Jail(object):
     def erase(self):
         if not os.path.exists(self._path):
             return
+        step('Erasing existing jail')
 
         if config.force_erase:
             self.cleanup() # Only cleanup resources when configured
@@ -156,12 +161,14 @@ class Jail(object):
         os.system('rpm2cpio %s | (cd %s ; cpio -dim --quiet)' % (pkg_path, self._path))
 
     def unpack(self, packages):
+        step('Unpacking packages to create initial system')
         for pkg_name, pkg_loc in packages:
             pkg_path = os.path.join(self._path, config.tmp_dir, pkg_loc.split('/')[-1])
             self.unpack_package(pkg_path)
         distro.execute_hooks('post_unpack')
 
     def install(self, packages):
+        step('Installing base packages')
         distro.execute_hooks('pre_install')
 
         if distro.gpgkey_path():
@@ -176,6 +183,7 @@ class Jail(object):
         execute_jailed('rpm -ivh %s' % ' '.join(packages))
 
         if config.include:
+            step('Installing additionally packages')
             distro.install_packages(config.include)
 
         distro.execute_hooks('post_install')
@@ -184,6 +192,7 @@ class Jail(object):
         """ Is executed to make the jail completely unused by the running system (remove
         all mounted filesystems and all processes using this jail. Then verify it and return
         either True or False depending on success """
+        step('Cleaning up jail mounts and processes')
         self.unmount()
         self.kill_processes()
 

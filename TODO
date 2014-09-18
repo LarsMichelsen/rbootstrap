@@ -12,8 +12,7 @@ A collection of short notes on what to do one day.
   * RedHat
   * CentOS
   * Fedora
-* Add mode where dependency tree of packages is visualized
-  (Would be helpful for adding new distros)
+* Add mode --print-debs which only resolves packages and exits
 * Add some tests
 * Add man page
 * Add bash completion for distros

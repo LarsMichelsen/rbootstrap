@@ -29,6 +29,7 @@ import traceback
 
 from rbootstrap import repo, jail, config, distro
 from rbootstrap.exceptions import *
+from rbootstrap.log import *
 
 def version():
     return (
@@ -114,7 +115,7 @@ def parse_opts():
         elif k == '--exclude':
             options['exclude'] = v.split(',')
         elif k == '--verbose':
-            options['verbose'] = v
+            options['verbose'] = True
         elif k == '--pre-erase':
             options['pre_erase'] = True
         elif k == '--force-erase':

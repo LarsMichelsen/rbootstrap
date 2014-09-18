@@ -36,6 +36,7 @@ pre_erase   = False
 force_erase = False
 include     = []
 exclude     = []
+verbose     = False
 
 def load():
     """ Load the specified configuration file """
