@@ -1,6 +1,5 @@
 A collection of short notes on what to do one day.
 
-* Check if already existing RPMs need to be re-downloaded
 * handle exit codes of system commands
 * Check downloaded RPMs signatures
 * Handle multiple repositories

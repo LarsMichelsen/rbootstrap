@@ -110,7 +110,7 @@ class Jail(object):
             raise RBError('Can not be erased. There are running processes using this jail.')
 
         for thing in os.listdir(self._path):
-            if config.keep_pkgs and thing == 'rb.tmp':
+            if config.keep_pkgs and thing == config.tmp_dir:
                 continue # Skip removing pkg directory when told to do so
 
             path = os.path.join(self._path, thing)
@@ -129,7 +129,7 @@ class Jail(object):
 
     def unpack(self, packages):
         step('Unpacking packages to create initial system')
-        for pkg_name, pkg_loc in packages:
+        for pkg_name, pkg_loc, pkg_csum in packages:
             pkg_path = os.path.join(self._path, config.tmp_dir, pkg_loc.split('/')[-1])
             self.unpack_package(pkg_path)
         distro.execute_hooks('post_unpack')
@@ -145,7 +145,7 @@ class Jail(object):
         # being executed
         packages = [
             os.path.join(config.tmp_dir, pkg_loc.split('/')[-1])
-            for pkg_name, pkg_loc in packages
+            for pkg_name, pkg_loc, pkg_csum in packages
         ]
         execute_jailed('rpm -ivh %s' % ' '.join(packages))
 

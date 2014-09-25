@@ -24,6 +24,7 @@ import urllib2
 import re
 import gzip
 import shutil
+import hashlib
 from StringIO import StringIO
 
 try:
@@ -148,8 +149,11 @@ class Repository(object):
         def add_with_required(pkg, lvl = 0):
             pkg_name = pkg.find(ns('common', 'name')).text
             pkg_loc  = pkg.find(ns('common', 'location')).get('href')
-            if (pkg_name, pkg_loc) not in needed_pkgs:
-                needed_pkgs.add((pkg_name, pkg_loc))
+            pkg_csum = (pkg.find(ns('common', 'checksum')).text,
+                        pkg.find(ns('common', 'checksum')).get('type'))
+
+            if (pkg_name, pkg_loc, pkg_csum) not in needed_pkgs:
+                needed_pkgs.add((pkg_name, pkg_loc, pkg_csum))
                 already_provided.extend(self._package_provides(pkg))
 
             fmt = pkg.find(ns('common', 'format'))
@@ -205,15 +209,43 @@ class Repository(object):
         with open(os.path.join(tmp_path, 'gpg.key'), 'wb') as fp:
             shutil.copyfileobj(fetch(self._gpgkey_path), fp)
 
+    def _use_existing_package(self, target_path, csum, csum_type):
+        """Checks whether or not a package needs to be downloaded
+
+        Existing files are checked against the checksum mentioned in
+        the repository meta data file.
+        """
+
+        if config.force_load_pkgs:
+            return False # Checking of existing files disabled
+
+        try:
+            try:
+                h = hashlib.__dict__[csum_type]()
+            except KeyError:
+                raise RBError('Hash algorithm "%s" not implemented' % csum_type)
+
+            with open(target_path,'rb') as fp:
+                for chunk in iter(lambda: fp.read(8192), b''):
+                    h.update(chunk)
+                return h.digest()
+        except IOError:
+            return False
+
     def download_packages(self, packages):
         tmp_path = self._tmp_path()
 
         step('Loading packages')
         verbose('Destination: %s' % tmp_path)
-        for pkg_name, pkg_loc in packages:
+        for pkg_name, pkg_loc, pkg_csum in packages:
             pkg_filename = os.path.basename(pkg_loc)
-            pkg_path = os.path.join(self._data_path, pkg_loc)
+            pkg_path     = os.path.join(self._data_path, pkg_loc)
+            target_path  = os.path.join(tmp_path, pkg_filename)
 
-            with open(os.path.join(tmp_path, pkg_filename), 'wb') as fp:
+            if self._use_existing_package(target_path, pkg_csum[0], pkg_csum[1]):
+                verbose('Use existing %s' % pkg_filename)
+                continue
+
+            with open(target_path, 'wb') as fp:
                 verbose('Loading %s' % pkg_filename)
                 shutil.copyfileobj(fetch(pkg_path), fp)

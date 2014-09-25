@@ -25,19 +25,20 @@ from .exceptions import *
 
 # Hardcoded default configuration which can be overwritten by configuration
 # files and/or command line options
-codename    = None
-arch        = 'x86_64'
-root        = None
-tmp_dir     = 'rb.tmp' # must be within root
+codename        = None
+arch            = 'x86_64'
+root            = None
+tmp_dir         = 'rb.tmp' # must be within root
 # FIXME:
-#distro_path = '/usr/share/rbootstrap/distros'
-distro_path = 'distros'
-pre_erase   = False
-force_erase = False
-keep_pkgs   = False
-include     = []
-exclude     = []
-verbose     = False
+#distro_path     = '/usr/share/rbootstrap/distros'
+distro_path     = 'distros'
+pre_erase       = False
+force_erase     = False
+keep_pkgs       = False
+force_load_pkgs = False
+include         = []
+exclude         = []
+verbose         = False
 only_print_pkgs = False
 
 def load():

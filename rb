@@ -59,17 +59,17 @@ def help(msg = None):
         '                     chroot jail in. This path might already be existant.\n'
         '\n'
         'OPTIONS:\n'
-        '    --arch=ARCH      Set the architecture to install (default: x86_64)\n'
+        '  --arch=ARCH        Set the architecture to install (default: x86_64)\n'
         '                     The possible options depend on the architecures supported\n'
         '                     by the distribution to be installed into the jail. Most\n'
         '                     support "x86_64" and "i386".\n'
-        '    --include=A,B,C  The packages specified here will be installed using the\n'
+        '  --include=A,B,C    The packages specified here will be installed using the\n'
         '                     package manager after the initial installation has been\n'
         '                     finished.\n'
-        '    --exclude=A,B,C  Remove these package names from the list of packages to\n'
+        '  --exclude=A,B,C    Remove these package names from the list of packages to\n'
         '                     be installed\n'
         '\n'
-        '    --pre-erase      Completely clear all data in TARGET before setting it up.\n'
+        '  --pre-erase        Completely clear all data in TARGET before setting it up.\n'
         '                     When the jail is still used by mounted filesystems or\n'
         '                     running processes rbootstrap will terminate with an\n'
         '                     error message.\n'
@@ -78,21 +78,26 @@ def help(msg = None):
         '                     BE CAREFUL: When you point TARGET to another directory\n'
         '                     than the jail, the data below this directory will be\n'
         '                     removed anyways.\n'
-        '    --force-erase    Use this to make "--pre-erase" make the jail unused.\n'
+        '  --force-erase      Use this to make "--pre-erase" make the jail unused.\n'
         '                     This means:\n'
         '                     a) Killing all processes accessing files of the jail\n'
         '                     b) Unmounting all filesystems mounted in the jail\n'
-        '    --keep-pkgs      Use this to make "--pre-erase" keep the downloaded\n'
+        '  --keep-pkgs        Use this to make "--pre-erase" keep the downloaded\n'
         '                     packages. This is useful when you do not want to\n'
         '                     download already loaded packages again.\n'
+        '  --force-load-pkgs  By default the locally existing packages are used\n'
+        '                     when their checksums match the repositories metadata.\n'
+        '                     This prevents duplicate downloading and might save time.\n'
+        '                     You can use this flag to ignore all existing packages\n'
+        '                     to download them again.\n'
         '\n'
-        '    --verbose        Print out details about actions to stdout\n'
+        '  --verbose          Print out details about actions to stdout\n'
         '\n'
-        '    --list-codenames Prints out a list of supported Linux distributions\n'
-        '    --print-pkgs     Print the packages to be installed, then exit\n'
+        '  --list-codenames   Prints out a list of supported Linux distributions\n'
+        '  --print-pkgs       Print the packages to be installed, then exit\n'
         '\n'
-        '    -V, --version    Print out version information\n'
-        '    -h, --help       Print this help screen\n'
+        '  -V, --version      Print out version information\n'
+        '  -h, --help         Print this help screen\n'
         '\n'
     )
     sys.exit(0)
@@ -106,6 +111,7 @@ def parse_opts():
     short_options = ['hV']
     long_options  = ['help', 'version', 'arch=', 'include=', 'exclude=', 'verbose',
                      'list-codenames', 'pre-erase', 'force-erase', 'keep-pkgs',
+                     'force-load-pkgs',
                      'print-pkgs', ]
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
@@ -129,6 +135,8 @@ def parse_opts():
             options['force_erase'] = True
         elif k == '--keep-pkgs':
             options['keep_pkgs'] = True
+        elif k == '--force-load-pkgs':
+            options['force_load_pkgs'] = True
         elif k == '--print-pkgs':
             options['only_print_pkgs'] = True
 
