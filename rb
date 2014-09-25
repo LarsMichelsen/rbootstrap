@@ -178,7 +178,8 @@ def main():
     # PHASE 2: Now access the package repository and use it to resolve all needed packages
     #
 
-    REPO = repo.Repository(distro.mirror_path(), distro.gpgkey_path(), config.package_architectures())
+    REPO = repo.Repository(distro.mirror_path(), distro.data_path(),
+                           distro.gpgkey_path(), config.package_architectures())
     install_packages = REPO.resolve_needed_packages(distro.needed_packages())
 
     if config.only_print_pkgs:

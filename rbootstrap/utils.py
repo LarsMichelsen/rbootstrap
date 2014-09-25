@@ -75,3 +75,8 @@ def chown(path, user, group, jailed = True):
 def chmod(path, mode):
     """ Changes permissions of a path within the context of the jail """
     os.chmod(os.path.join(config.root, path[1:]), mode)
+
+def url(url):
+    return url % {
+        'arch': config.arch
+    }

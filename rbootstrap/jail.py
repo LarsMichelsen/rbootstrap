@@ -48,7 +48,8 @@ class Jail(object):
         distro.execute_hooks('pre_init')
         copy_file('/etc/resolv.conf')
         copy_file('/etc/hostname')
-        self.setup_devices()
+        #FIXME: Not working equal for centos
+        #self.setup_devices()
         self.setup_proc()
         distro.execute_hooks('post_init')
 
@@ -110,9 +111,12 @@ class Jail(object):
     def get_mounts(self):
         """ Returns a list of mountpoints mounted in the jail """
         mounts = []
-        for l in file('/proc/mounts'):
-            if l.split()[1].startswith(self._path):
-                mounts.append(l.split()[1])
+        try:
+            for l in file('/proc/mounts'):
+                if l.split()[1].startswith(self._path):
+                    mounts.append(l.split()[1])
+        except IOError:
+            pass # Not existing file is OK!
         return mounts
 
     def unmount(self):

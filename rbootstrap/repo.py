@@ -61,27 +61,18 @@ def ns(name, key):
     return '{http://linux.duke.edu/metadata/%s}%s' % (name, key)
 
 class Repository(object):
-    def __init__(self, mirror_path, gpgkey_path, allowed_arch):
+    def __init__(self, mirror_path, data_path, gpgkey_path, allowed_arch):
         self._mirror_path  = mirror_path
+        self._data_path    = data_path
         self._gpgkey_path  = gpgkey_path
         self._allowed_arch = allowed_arch
 
         step('Reading repository meta information')
-        verbose('Repository: %s\nPackage Architectures: %s' % (self._mirror_path, ', '.join(self._allowed_arch)))
+        verbose('Repository: %s\nPackage Architectures: %s' %
+                (self._mirror_path, ', '.join(self._allowed_arch)))
 
-        self._get_data_path()
         self._get_primary_path()
         self._fetch_primary()
-
-    def _get_data_path(self):
-        repo_content_path = os.path.join(self._mirror_path, 'content')
-        for l in fetch(repo_content_path):
-            if l.startswith('DATADIR'):
-                self._data_path = os.path.join(self._mirror_path, l.rstrip().split()[1])
-                return
-
-        raise IOError('Unable to find DATADIR in primary info in "%s"' % repo_content_path)
-
 
     def _get_primary_path(self):
         """ Parse the repomd.xml to get the path to the "primary" xml file """

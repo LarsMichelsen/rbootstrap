@@ -23,11 +23,15 @@ import re
 
 from . import config
 from .utils import *
+from .exceptions import *
 
 gpgkey = None
 
 def load(codename):
-    execfile(os.path.join(config.distro_path, codename), globals(), globals())
+    try:
+        execfile(os.path.join(config.distro_path, codename), globals(), globals())
+    except Exception, e:
+        raise BailOut('Exception in distribution specefication file: %s' % e)
 
     # Verify that the distro registers all needed things
     for key in [ 'architectures', 'packages', 'mirror', 'install_packages' ]:
@@ -41,11 +45,17 @@ def supported_architectures():
 def needed_packages():
     return packages
 
+def data_path():
+    if 'get_data_path' in globals():
+        return get_data_path()
+    return mirror_path()
+
 def mirror_path():
-    return mirror
+    return url(mirror)
 
 def gpgkey_path():
-    return gpgkey
+    if gpgkey:
+        return url(gpgkey)
 
 def execute_hooks(what):
     if 'hook_' + what in globals():

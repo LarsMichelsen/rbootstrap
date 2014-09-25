@@ -19,6 +19,14 @@ architectures = [
     'i386',
 ]
 
+def get_data_path():
+    repo_content_path = os.path.join(mirror, 'content')
+    for l in fetch(repo_content_path):
+        if l.startswith('DATADIR'):
+            return os.path.join(mirror, l.rstrip().split()[1])
+
+    raise IOError('Unable to find DATADIR in primary info in "%s"' % repo_content_path)
+
 def install_packages(packages):
     execute_jailed('zypper -n install %s' % (' '.join(packages)))
 
