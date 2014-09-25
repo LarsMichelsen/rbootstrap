@@ -20,6 +20,7 @@
 
 import os
 import re
+import stat
 
 from . import config
 from .utils import *
@@ -56,6 +57,16 @@ def mirror_path():
 def gpgkey_path():
     if gpgkey:
         return url(gpgkey)
+
+def device_nodes():
+    """ Returns a list of sextuples, where the fields are defined as follows:
+    0: name of the device (=> /dev/<name>)
+    1: The file mode to set
+    2: the major of the device node
+    3: the minor of the device node
+    4: owner (either string (user name) or integer (uid))
+    5: group (either string (group name) or integer (gid)) """
+    return devices
 
 def execute_hooks(what):
     if 'hook_' + what in globals():

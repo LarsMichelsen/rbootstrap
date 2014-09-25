@@ -19,6 +19,46 @@ architectures = [
     'i386',
 ]
 
+devices = [
+    ('console',  0600|stat.S_IFCHR, 5,  1, 'root', 'tty'),
+    ('full',     0666|stat.S_IFCHR, 1,  7, 'root', 'root'),
+    ('kmem',     0640|stat.S_IFCHR, 1,  2, 'root', 'kmem'),
+    ('loop0',    0660|stat.S_IFBLK, 7,  0, 'root', 'disk'),
+    ('loop1',    0660|stat.S_IFBLK, 7,  1, 'root', 'disk'),
+    ('loop2',    0660|stat.S_IFBLK, 7,  2, 'root', 'disk'),
+    ('loop3',    0660|stat.S_IFBLK, 7,  3, 'root', 'disk'),
+    ('loop4',    0660|stat.S_IFBLK, 7,  4, 'root', 'disk'),
+    ('loop5',    0660|stat.S_IFBLK, 7,  5, 'root', 'disk'),
+    ('loop6',    0660|stat.S_IFBLK, 7,  6, 'root', 'disk'),
+    ('loop7',    0660|stat.S_IFBLK, 7,  7, 'root', 'disk'),
+    ('mem',      0640|stat.S_IFCHR, 1,  1, 'root', 'kmem'),
+    ('null',     0666|stat.S_IFCHR, 1,  3, 'root', 'root'),
+    ('port',     0640|stat.S_IFCHR, 1,  4, 'root', 'kmem'),
+    ('ptmx',     0666|stat.S_IFCHR, 5,  2, 'root', 'tty'),
+    ('ram0',     0660|stat.S_IFBLK, 1,  0, 'root', 'disk'),
+    ('ram1',     0660|stat.S_IFBLK, 1,  1, 'root', 'disk'),
+    ('ram2',     0660|stat.S_IFBLK, 1,  2, 'root', 'disk'),
+    ('ram3',     0660|stat.S_IFBLK, 1,  3, 'root', 'disk'),
+    ('ram4',     0660|stat.S_IFBLK, 1,  4, 'root', 'disk'),
+    ('ram5',     0660|stat.S_IFBLK, 1,  5, 'root', 'disk'),
+    ('ram6',     0660|stat.S_IFBLK, 1,  6, 'root', 'disk'),
+    ('ram7',     0660|stat.S_IFBLK, 1,  7, 'root', 'disk'),
+    ('ram8',     0660|stat.S_IFBLK, 1,  8, 'root', 'disk'),
+    ('ram9',     0660|stat.S_IFBLK, 1,  9, 'root', 'disk'),
+    ('ram10',    0660|stat.S_IFBLK, 1, 10, 'root', 'disk'),
+    ('ram11',    0660|stat.S_IFBLK, 1, 11, 'root', 'disk'),
+    ('ram12',    0660|stat.S_IFBLK, 1, 12, 'root', 'disk'),
+    ('ram13',    0660|stat.S_IFBLK, 1, 13, 'root', 'disk'),
+    ('ram14',    0660|stat.S_IFBLK, 1, 14, 'root', 'disk'),
+    ('ram15',    0660|stat.S_IFBLK, 1, 15, 'root', 'disk'),
+    ('ram16',    0660|stat.S_IFBLK, 1, 16, 'root', 'disk'),
+    ('random',   0666|stat.S_IFCHR, 1,  8, 'root', 'root'),
+    ('tty',      0666|stat.S_IFCHR, 5,  0, 'root', 'tty'),
+    ('tty0',     0600|stat.S_IFCHR, 4,  0, 'root', 'tty'),
+    ('urandom',  0666|stat.S_IFCHR, 1,  9, 'root', 'root'),
+    ('zero',     0666|stat.S_IFCHR, 1,  5, 'root', 'root'),
+]
+
 def get_data_path():
     repo_content_path = os.path.join(mirror, 'content')
     for l in fetch(repo_content_path):

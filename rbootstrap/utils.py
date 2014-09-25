@@ -62,7 +62,14 @@ def execute_jailed(cmd):
     os.system('chroot %s %s' % (config.root, cmd))
 
 def _chown_jailed(path, user, group):
-    os.chown(path, pwd.getpwnam(user).pw_uid, grp.getgrnam(group).gr_gid)
+    """ Changes the owner / group of a file by accepting user and group
+    either as string (name) or integer (id of the user/group). Resolves
+    the names in the context of the jail """
+    if type(user) != int:
+        user = pwd.getpwnam(user).pw_uid
+    if type(group) != int:
+        group = grp.getgrnam(group).gr_gid
+    os.chown(path, user, group)
 
 def chown(path, user, group, jailed = True):
     """ Changes ownership of a path within the context of the jail """
