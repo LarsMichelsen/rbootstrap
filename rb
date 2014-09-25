@@ -68,6 +68,7 @@ def help(msg = None):
         '                     finished.\n'
         '    --exclude=A,B,C  Remove these package names from the list of packages to\n'
         '                     be installed\n'
+        '\n'
         '    --pre-erase      Completely clear all data in TARGET before setting it up.\n'
         '                     When the jail is still used by mounted filesystems or\n'
         '                     running processes rbootstrap will terminate with an\n'
@@ -81,6 +82,10 @@ def help(msg = None):
         '                     This means:\n'
         '                     a) Killing all processes accessing files of the jail\n'
         '                     b) Unmounting all filesystems mounted in the jail\n'
+        '    --keep-pkgs      Use this to make "--pre-erase" keep the downloaded\n'
+        '                     packages. This is useful when you do not want to\n'
+        '                     download already loaded packages again.\n'
+        '\n'
         '    --verbose        Print out details about actions to stdout\n'
         '\n'
         '    --list-codenames Prints out a list of supported Linux distributions\n'
@@ -100,7 +105,8 @@ def list_codenames():
 def parse_opts():
     short_options = ['hV']
     long_options  = ['help', 'version', 'arch=', 'include=', 'exclude=', 'verbose',
-                     'list-codenames', 'pre-erase', 'force-erase', 'print-pkgs', ]
+                     'list-codenames', 'pre-erase', 'force-erase', 'keep-pkgs',
+                     'print-pkgs', ]
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
     except getopt.GetoptError, e:
@@ -121,6 +127,8 @@ def parse_opts():
             options['pre_erase'] = True
         elif k == '--force-erase':
             options['force_erase'] = True
+        elif k == '--keep-pkgs':
+            options['keep_pkgs'] = True
         elif k == '--print-pkgs':
             options['only_print_pkgs'] = True
 

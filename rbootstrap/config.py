@@ -34,6 +34,7 @@ tmp_dir     = 'rb.tmp' # must be within root
 distro_path = 'distros'
 pre_erase   = False
 force_erase = False
+keep_pkgs   = False
 include     = []
 exclude     = []
 verbose     = False

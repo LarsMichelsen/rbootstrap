@@ -150,6 +150,9 @@ class Jail(object):
             raise RBError('Can not be erased. There are running processes using this jail.')
 
         for thing in os.listdir(self._path):
+            if config.keep_pkgs and thing == 'rb.tmp':
+                continue # Skip removing pkg directory when told to do so
+
             path = os.path.join(self._path, thing)
             if os.path.isfile(path):
                 os.unlink(path)
