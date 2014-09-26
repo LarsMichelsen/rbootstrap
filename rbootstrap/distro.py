@@ -31,8 +31,11 @@ gpgkey = None
 def load(codename):
     try:
         execfile(os.path.join(config.distro_path, codename), globals(), globals())
+    except IOError, e:
+        raise BailOut('The specified distribution is not supported. Take a look at '
+                      '"--list-codenames" for a list of supported distributions.')
     except Exception, e:
-        raise BailOut('Exception in distribution specefication file: %s' % e)
+        raise BailOut('Exception in distribution specification file: %s' % e)
 
     # Verify that the distro registers all needed things
     for key in [ 'architectures', 'packages', 'mirror', 'install_packages' ]:

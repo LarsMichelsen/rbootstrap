@@ -61,6 +61,12 @@ def distros():
     return [ f for f in os.listdir(distro_path)
              if f[0] != '.' ]
 
+def distro_name():
+    return codename.split('_', 1)[0]
+
+def distro_version():
+    return codename.split('_', 1)[1]
+
 def package_architectures():
     if arch == 'x86_64':
         return ['x86_64', 'noarch']

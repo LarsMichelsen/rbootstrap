@@ -88,5 +88,8 @@ def chmod(path, mode):
 
 def url(url):
     return url % {
-        'arch': config.arch
+        'arch'      : config.arch,
+        'codename'  : config.codename,
+        'distro'    : config.distro_name(),
+        'version'   : config.distro_version(),
     }

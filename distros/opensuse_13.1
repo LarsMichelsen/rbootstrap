@@ -1,8 +1,8 @@
 # The default mirror to use
-mirror = 'http://download.opensuse.org/distribution/13.1/repo/oss/'
+mirror = 'http://download.opensuse.org/distribution/%(version)s/repo/oss/'
 # URL to file containing the GPG key which is used to sign RPMs
 # (Set to None to disable import during setup)
-gpgkey = 'http://download.opensuse.org/distribution/13.1/repo/oss/content.key'
+gpgkey = 'http://download.opensuse.org/distribution/%(version)s/repo/oss/content.key'
 
 # Packages to install
 packages = [
