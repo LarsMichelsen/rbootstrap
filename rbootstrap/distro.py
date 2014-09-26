@@ -55,9 +55,13 @@ def data_path():
     return mirror_path()
 
 def mirror_path():
+    if config.mirror_path:
+        return config.mirror_path
     return url(mirror)
 
 def gpgkey_path():
+    if config.gpgkey_path:
+        return config.gpgkey_path
     if gpgkey:
         return url(gpgkey)
 

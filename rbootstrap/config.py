@@ -27,6 +27,8 @@ from .exceptions import *
 # files and/or command line options
 codename        = None
 arch            = 'x86_64'
+mirror_path     = None
+gpgkey_path     = None
 root            = None
 tmp_dir         = 'rb.tmp' # must be within root
 # FIXME:

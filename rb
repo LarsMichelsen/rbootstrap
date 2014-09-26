@@ -94,6 +94,11 @@ def help(msg = None):
         '                     You can use this flag to ignore all existing packages\n'
         '                     to download them again.\n'
         '\n'
+        ' --mirror            Use this mirror instead of the default mirror specified\n'
+        '                     for the choosen distribution.\n'
+        ' --gpgkey            Use this GPG key instead of the default one specified\n'
+        '                     for the choosen distribution.\n'
+        '\n'
         '  --verbose          Print out details about actions to stdout\n'
         '\n'
         '  --list-codenames   Prints out a list of supported Linux distributions\n'
@@ -114,7 +119,7 @@ def parse_opts():
     short_options = ['hV']
     long_options  = ['help', 'version', 'arch=', 'include=', 'exclude=', 'verbose',
                      'list-codenames', 'pre-erase', 'force-erase', 'keep-pkgs',
-                     'force-load-pkgs', 'no-check-pkg-sig',
+                     'force-load-pkgs', 'no-check-pkg-sig', 'mirror=', 'gpgkey=',
                      'print-pkgs', ]
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
@@ -130,6 +135,10 @@ def parse_opts():
             options['include'] = v.split(',')
         elif k == '--exclude':
             options['exclude'] = v.split(',')
+        elif k == '--mirror':
+            options['mirror_path'] = v
+        elif k == '--gpgkey':
+            options['gpgkey_path'] = v
         elif k == '--verbose':
             options['verbose'] = True
         elif k == '--no-check-pkg-sig':
