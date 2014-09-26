@@ -88,7 +88,8 @@ when you got easy solutions to remove one of the dependencies mentioned above.
 At the moment there is support to install the following distributions in a chroot:
 
 * OpenSUSE 13.1
-* CentOS 6.0 - 6.5
+* CentOS 6.0 - 7.0
+* Fedora 18 - 20
 
 This list might not be always up-to-date, please take a look at the files
 in the `distros` directory to get the real list of supported ones.

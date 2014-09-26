@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+# encoding: utf-8
+#
+# rbootstrap - Install RPM based Linux into chroot jails
+# Copyright (C) 2014 Lars Michelsen <lm@larsmichelsen.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# Determine the URL of the default mirror to use
+
+# This distributions specification file is used for Fedora 20 at the moment
+
+def mirror():
+    return url('http://download.fedoraproject.org/pub/fedora/linux//releases/%(version)s/Fedora/%(arch)s/os/')
+
+# URL to file containing the GPG key which is used to sign RPMs
+# (Set to None to disable import during setup)
+def gpgkey():
+    v = config.distro_version()
+    if v == '22':
+        return 'https://fedoraproject.org/static/8E1431D5.txt'
+    elif v == '21':
+        return 'https://fedoraproject.org/static/95A43F54.txt'
+    elif v == '20':
+        return 'https://fedoraproject.org/static/246110C1.txt'
+    elif v == '19':
+        return 'https://fedoraproject.org/static/FB4B18E6.txt'
+    # Not using older keys
+
+# Packages to install
+packages = [
+    'filesystem', 'basesystem', 'setup',
+    'rpm', 'yum', 'rootfiles', 'libselinux',
+]
+
+# Possible architectures
+architectures = [
+    'x86_64',
+    'i386',
+    'armhfp',
+]
+
+devices = [
+    # name       perms              maj min usr grp
+    ('console',  0622|stat.S_IFCHR, 5,  1,  0,  5), # grp: tty
+    ('null',     0666|stat.S_IFCHR, 1,  3,  0,  0),
+    ('ptmx',     0666|stat.S_IFCHR, 5,  2,  0,  5),
+    ('random',   0444|stat.S_IFCHR, 1,  8,  0,  0),
+    ('tty',      0666|stat.S_IFCHR, 5,  0,  0,  5),
+    ('urandom',  0444|stat.S_IFCHR, 1,  9,  0,  0),
+    ('zero',     0666|stat.S_IFCHR, 1,  5,  0,  0),
+]
+
+def install_packages(packages):
+    execute_jailed('yum -y makecache ; yum -y install %s' % (' '.join(packages)))
+
+def yum_add_repo():
+    write_file('/etc/yum.repos.d/os.repo', '''[os]
+name=Fedora %s
+baseurl=%s
+gpgkey=%s
+gpgcheck=1
+enabled=1
+''' % (config.distro_version(), mirror(), gpgkey()))
+
+def hook_post_unpack():
+    yum_add_repo()
