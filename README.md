@@ -18,6 +18,20 @@ usable ones. So I decided to start this small project.
 
 Hope it is usable for someone out there. Let me know!
 
+## Installation
+
+Download the git or a release tarball. In case of the release tarball you
+first need to unpack it (`tar xvzf rbootstrap-<version>.tar.gz`) and then
+change into the just created directory (`cd rbootstrap-<version>`).
+
+To install the downloaded version of rbootstrap use this command:
+
+```
+python setup.py install
+```
+
+After this you should be able to execute `rbootstrap --help`.
+
 ## Usage
 
 The common use case is to call rbootstrap once for setting up a chroot jail
@@ -102,6 +116,8 @@ I decided to use GitHub for managing project related communication, you
 can find the project at (https://github.com/LaMi-/rbootstrap).
 
 ## Licensing
+
+Copyright (C) 2014 Lars Michelsen <lm@larsmichelsen.com>
 
 All outcome of the project is licensed under the terms of the GNU GPL v2.
 Take a look at the LICENSE file for details.
