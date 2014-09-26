@@ -1,8 +1,51 @@
-# The default mirror to use
-mirror = 'http://vault.centos.org/%(version)s/os/%(arch)s/'
+#!/usr/bin/env python
+# encoding: utf-8
+#
+# rbootstrap - Install RPM based Linux into chroot jails
+# Copyright (C) 2014 Lars Michelsen <lm@larsmichelsen.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# Determine the URL of the default mirror to use
+
+# This distributions specification file is used for CentOS 6.0 to 7.0
+# at the moment. Depending on the configuration the user provided it
+# uses different URLs for accessing the needed packages.
+
+def mirror():
+    # CentOS moves the releases of the older versions from mirror.centos.org
+    # to vault.centos.org.
+    # Found no quick'n clever way to auto detect the versions which are either
+    # available from mirror.centos.org or vault.centos.org. Please report if
+    # you got a good idea.
+    if config.distro_version() == '6.5':
+        return url('http://mirror.centos.org/centos/%(version)s/os/%(arch)s/')
+    elif config.distro_version() == '7.0':
+        # For the moment, where only 7.0 has been released, the URL is only "7"
+        # instead of 7.0 - odd. I am pretty sure that this must be changed once
+        # 7.1 had been released. Would welcome more persistent URLs
+        return url('http://mirror.centos.org/centos/%(version_major)s/os/%(arch)s/')
+    else:
+        return url('http://vault.centos.org/%(version)s/os/%(arch)s/')
+
 # URL to file containing the GPG key which is used to sign RPMs
 # (Set to None to disable import during setup)
-gpgkey = 'http://vault.centos.org/%(version)s/os/%(arch)s/RPM-GPG-KEY-CentOS-6'
+def gpgkey():
+    if config.distro_version().startswith('7.'):
+        return mirror() + 'RPM-GPG-KEY-CentOS-7'
+    else:
+        return mirror() + 'RPM-GPG-KEY-CentOS-6'
 
 # Packages to install
 packages = [
@@ -37,7 +80,7 @@ baseurl=%s
 gpgkey=%s
 gpgcheck=1 
 enabled=1
-''' % (url(mirror), url(gpgkey)))
+''' % (mirror(), gpgkey()))
 
 def hook_post_unpack():
     yum_add_repo()

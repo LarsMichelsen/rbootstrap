@@ -86,10 +86,11 @@ def chmod(path, mode):
     """ Changes permissions of a path within the context of the jail """
     os.chmod(os.path.join(config.root, path[1:]), mode)
 
-def url(url):
-    return url % {
-        'arch'      : config.arch,
-        'codename'  : config.codename,
-        'distro'    : config.distro_name(),
-        'version'   : config.distro_version(),
+def url(path):
+    return path % {
+        'arch'          : config.arch,
+        'codename'      : config.codename,
+        'distro'        : config.distro_name(),
+        'version'       : config.distro_version(),
+        'version_major' : config.distro_version().split('.', 1)[0],
     }

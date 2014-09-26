@@ -27,6 +27,11 @@ import getopt
 import atexit
 import traceback
 
+# Needed for using the rbootstrap package directly from git repository
+# during development instead of other versions installed somewhere
+if os.path.realpath(__file__).endswith('scripts/rbootstrap'):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
 from rbootstrap import repo, jail, config, distro
 from rbootstrap.exceptions import *
 from rbootstrap.log import *

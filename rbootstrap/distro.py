@@ -57,13 +57,13 @@ def data_path():
 def mirror_path():
     if config.mirror_path:
         return config.mirror_path
-    return url(mirror)
+    return mirror()
 
 def gpgkey_path():
     if config.gpgkey_path:
         return config.gpgkey_path
     if gpgkey:
-        return url(gpgkey)
+        return gpgkey()
 
 def device_nodes():
     """ Returns a list of sextuples, where the fields are defined as follows:

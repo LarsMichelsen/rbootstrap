@@ -4,9 +4,7 @@ A collection of short notes on what to do one day.
 * Add support for distros
   * SLES
   * RedHat
-  * CentOS 6.5, 7.0
   * Fedora
-* Add makefile to pack / deploy / create packages
 * Add some tests
 * Add man page
 * Add bash completion for distros

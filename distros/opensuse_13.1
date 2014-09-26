@@ -1,8 +1,29 @@
+#!/usr/bin/env python
+# encoding: utf-8
+#
+# rbootstrap - Install RPM based Linux into chroot jails
+# Copyright (C) 2014 Lars Michelsen <lm@larsmichelsen.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# Determine the URL of the default mirror to use
+
 # The default mirror to use
-mirror = 'http://download.opensuse.org/distribution/%(version)s/repo/oss/'
+mirror = lambda: url('http://download.opensuse.org/distribution/%(version)s/repo/oss/')
 # URL to file containing the GPG key which is used to sign RPMs
 # (Set to None to disable import during setup)
-gpgkey = 'http://download.opensuse.org/distribution/%(version)s/repo/oss/content.key'
+gpgkey = lambda: url('http://download.opensuse.org/distribution/%(version)s/repo/oss/content.key')
 
 # Packages to install
 packages = [
@@ -60,10 +81,10 @@ devices = [
 ]
 
 def get_data_path():
-    repo_content_path = os.path.join(mirror, 'content')
+    repo_content_path = os.path.join(mirror(), 'content')
     for l in fetch(repo_content_path):
         if l.startswith('DATADIR'):
-            return os.path.join(mirror, l.rstrip().split()[1])
+            return os.path.join(mirror(), l.rstrip().split()[1])
 
     raise IOError('Unable to find DATADIR in primary info in "%s"' % repo_content_path)
 
@@ -141,7 +162,7 @@ messagebus:!:16015::::::
     chmod('/etc/shadow', 0640)
 
 def zypper_add_repo():
-    execute_jailed('zypper -q ar %s repo-oss' % mirror)
+    execute_jailed('zypper -q ar %s repo-oss' % mirror())
 
 def zypper_enforce_architecture():
     new_data = re.sub('#?\s?arch = [a-z0-9_-]+', 'arch = %s' % config.arch, read_file('/etc/zypp/zypp.conf'))
