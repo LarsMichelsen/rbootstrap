@@ -25,5 +25,4 @@ setversion:
 	sed -i "s/version='.*',/version='$(NEW_VERSION)',/g" setup.py
 
 clean:
-	rm -rf *.jail dist 2>/dev/null || true
-	rm rbootstrap-*.tar.gz MANIFEST || true
+	rm -rf *.jail dist MANIFEST 2>/dev/null || true
