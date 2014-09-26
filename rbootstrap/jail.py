@@ -154,7 +154,13 @@ class Jail(object):
             os.path.join(config.tmp_dir, pkg_loc.split('/')[-1])
             for pkg_name, pkg_loc, pkg_csum in packages
         ]
-        execute_jailed('rpm -ivh %s' % ' '.join(packages))
+
+        if not config.check_pkg_sig:
+            nosig = ' --nosignature'
+        else:
+            nosig = ''
+
+        execute_jailed('rpm -ivh %s%s' % (nosig, ' '.join(packages)))
 
         if config.include:
             step('Installing additionally packages')

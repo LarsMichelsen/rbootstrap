@@ -36,6 +36,7 @@ pre_erase       = False
 force_erase     = False
 keep_pkgs       = False
 force_load_pkgs = False
+check_pkg_sig   = True
 include         = []
 exclude         = []
 verbose         = False

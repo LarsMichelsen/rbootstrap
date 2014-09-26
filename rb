@@ -69,6 +69,9 @@ def help(msg = None):
         '  --exclude=A,B,C    Remove these package names from the list of packages to\n'
         '                     be installed\n'
         '\n'
+        '  --no-check-pkg-sig Do not verify that packages are signed with the GPG key\n'
+        '                     retrieved from the repository. By default all packages\n'
+        '                     are checked when installing them to the JAIL.\n'
         '  --pre-erase        Completely clear all data in TARGET before setting it up.\n'
         '                     When the jail is still used by mounted filesystems or\n'
         '                     running processes rbootstrap will terminate with an\n'
@@ -111,7 +114,7 @@ def parse_opts():
     short_options = ['hV']
     long_options  = ['help', 'version', 'arch=', 'include=', 'exclude=', 'verbose',
                      'list-codenames', 'pre-erase', 'force-erase', 'keep-pkgs',
-                     'force-load-pkgs',
+                     'force-load-pkgs', 'no-check-pkg-sig',
                      'print-pkgs', ]
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
@@ -129,6 +132,8 @@ def parse_opts():
             options['exclude'] = v.split(',')
         elif k == '--verbose':
             options['verbose'] = True
+        elif k == '--no-check-pkg-sig':
+            options['check_pkg_sig'] = True
         elif k == '--pre-erase':
             options['pre_erase'] = True
         elif k == '--force-erase':
