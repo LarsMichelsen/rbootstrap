@@ -1,6 +1,5 @@
 A collection of short notes on what to do one day.
 
-* handle exit codes of system commands
 * Check downloaded RPMs signatures
 * Handle multiple repositories
 * Add support for distros

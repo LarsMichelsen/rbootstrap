@@ -26,8 +26,10 @@ hook functions of the distro specifications.
 import os
 import pwd
 import grp
+import subprocess
 
 from . import config
+from .exceptions import *
 
 def read_file(path):
     return file(os.path.join(config.root, path[1:])).read()
@@ -59,7 +61,8 @@ def call_jailed(handler, *args):
 
 def execute_jailed(cmd):
     """ Executes a command within the context of the jail """
-    os.system('chroot %s %s' % (config.root, cmd))
+    if subprocess.call('chroot %s %s' % (config.root, cmd), shell=True) != 0:
+        raise RBError('JAIL: Failed to execute: %s' % cmd)
 
 def _chown_jailed(path, user, group):
     """ Changes the owner / group of a file by accepting user and group

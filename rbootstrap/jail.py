@@ -20,6 +20,7 @@
 
 import os
 import shutil
+import subprocess
 
 from . import distro, config
 from .log import *
@@ -65,7 +66,8 @@ class Jail(object):
 
     def setup_proc(self):
         step('Mounting needed filesystems')
-        os.system('mount -t proc proc %s/proc' % self._path)
+        if subprocess.call('mount -t proc proc %s/proc' % self._path, shell = True) != 0:
+            raise RBError('Failed to mount /proc to jail')
         # FIXME: Maybe mount /sys
 
     def get_mounts(self):
@@ -83,7 +85,9 @@ class Jail(object):
         """ Tries to unmount all mounted filesystems within the jail. Sort the filesystem by
         length of the mount point string to first unmount the deeper ones """
         for mp in sorted([p.split('/') for p in self.get_mounts()], key = len, reverse = True):
-            os.system('umount -f %s' % '/'.join(mp))
+            path = '/'.join(mp)
+            if subprocess.call('umount -f %s' % path, shell=True) != 0:
+                raise RBError('Failed to unmount %s' % path)
 
     def get_processes(self):
         """ Returns a list of process ids which are currently using files within this jail. """
@@ -125,12 +129,15 @@ class Jail(object):
         is just needed to create a minimalistics system to be able to perform the chroot into
         and use the installer afterwards. """
         # FIXME: Use python libs?
-        os.system('rpm2cpio %s | (cd %s ; cpio -dim --quiet)' % (pkg_path, self._path))
+        cmd = 'rpm2cpio %s | (cd %s ; cpio -dim --quiet)' % (pkg_path, self._path)
+        if subprocess.call(cmd, shell=True) != 0:
+            raise RBError('Failed to extract %s to jail' % pkg_path)
 
     def unpack(self, packages):
         step('Unpacking packages to create initial system')
         for pkg_name, pkg_loc, pkg_csum in packages:
             pkg_path = os.path.join(self._path, config.tmp_dir, pkg_loc.split('/')[-1])
+            verbose('Unpacking %s' % pkg_name)
             self.unpack_package(pkg_path)
         distro.execute_hooks('post_unpack')
 

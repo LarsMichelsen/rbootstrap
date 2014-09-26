@@ -228,7 +228,7 @@ class Repository(object):
             with open(target_path,'rb') as fp:
                 for chunk in iter(lambda: fp.read(8192), b''):
                     h.update(chunk)
-                return h.digest()
+                return h.hexdigest() == csum
         except IOError:
             return False
 
