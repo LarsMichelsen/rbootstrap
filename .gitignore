@@ -1,4 +1,7 @@
 *.pyc
 *.swp
-chroot
+*.jail
 repodata
+MANIFEST
+dist
+build
