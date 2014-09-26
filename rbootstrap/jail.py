@@ -118,7 +118,7 @@ class Jail(object):
                 continue # Skip removing pkg directory when told to do so
 
             path = os.path.join(self._path, thing)
-            if os.path.isfile(path):
+            if os.path.isfile(path) or os.path.islink(path):
                 os.unlink(path)
             else:
                 shutil.rmtree(path)

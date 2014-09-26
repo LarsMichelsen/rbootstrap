@@ -111,7 +111,7 @@ class Repository(object):
         providers        = {}
         needed_pkg_elems = []
         already_provided = []
-        needed_pkgs      = set([])
+        needed_pkgs      = []
 
         step('Resolving package dependencies')
         verbose('Requested packages:\n%s' % ''.join([ '    %s\n' % p for p in needed ]))
@@ -153,7 +153,7 @@ class Repository(object):
                         pkg.find(ns('common', 'checksum')).get('type'))
 
             if (pkg_name, pkg_loc, pkg_csum) not in needed_pkgs:
-                needed_pkgs.add((pkg_name, pkg_loc, pkg_csum))
+                needed_pkgs.append((pkg_name, pkg_loc, pkg_csum))
                 already_provided.extend(self._package_provides(pkg))
 
             fmt = pkg.find(ns('common', 'format'))

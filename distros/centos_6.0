@@ -49,7 +49,7 @@ def gpgkey():
 
 # Packages to install
 packages = [
-    'setup', 'basesystem', 'filesystem',
+    'filesystem', 'basesystem', 'setup',
     'rpm', 'yum', 'rootfiles', 'libselinux',
 ]
 
