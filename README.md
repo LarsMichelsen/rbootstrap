@@ -20,7 +20,50 @@ Hope it is usable for someone out there. Let me know!
 
 ## Usage
 
-FIXME
+The common use case is to call rbootstrap once for setting up a chroot jail
+below a path of your choice.
+
+For example, to create a jail for CentOS 6.0 in the directory
+`/var/lib/centos_6.0_jail` on my Ubuntu system, I used the following command:
+
+```
+> sudo rbootstrap centos_6.0 /var/lib/centos_6.0_jail
++- Initializing jail -----------------------------------------------------------
++- Creating device nodes -------------------------------------------------------
++- Mounting needed filesystems -------------------------------------------------
++- Reading repository meta information -----------------------------------------
++- Resolving package dependencies ----------------------------------------------
++- Loading repositories GPG key ------------------------------------------------
++- Loading packages ------------------------------------------------------------
++- Unpacking packages to create initial system ---------------------------------
++- Installing base packages ----------------------------------------------------
+(...)
++- Cleaning up jail mounts and processes ---------------------------------------
+```
+
+After starting the command, rbootstrap does its work and, when no error happend,
+leaves the prepared jail in `/var/lib/centos_6.0_jail`. You can now use it
+for whatever you like. The most simple task would now be to change into the
+jail and, for example, install additional needed packages.
+
+```
+> sudo chroot /var/lib/centos_6.0_jail
+> yum install vim
+(...)
+```
+
+To have a more complete working environment, you might need to perform some
+other actions before changing into the jail, for example mount the /proc and
+/sys filesystems. Maybe you also like to set a custom prompt (`PS1`) which
+might prevent you from accidental command execution within or outer the jail.
+
+*Please be aware:* When you have mounted filesystems to the jail and try to
+remove it e.g. with `rm -rf`, you might delete contents of these filesystems
+by accident. So always ensure that you have unmounted all filesystems from
+a jail before trying to delete the jail.
+
+Take a look at the output of `rbootstrap --help` for details about how to
+call rbootstrap and which options are available.
 
 ## Prerequisites
 
@@ -45,7 +88,7 @@ when you got easy solutions to remove one of the dependencies mentioned above.
 At the moment there is support to install the following distributions in a chroot:
 
 * OpenSUSE 13.1
-* FIXME ...working on more...
+* CentOS 6.0 - 6.5
 
 This list might not be always up-to-date, please take a look at the files
 in the `distros` directory to get the real list of supported ones.

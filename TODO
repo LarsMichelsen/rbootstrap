@@ -6,6 +6,7 @@ A collection of short notes on what to do one day.
   * RedHat
   * CentOS
   * Fedora
+* Add makefile to pack / deploy / create packages
 * Add some tests
 * Add man page
 * Add bash completion for distros
