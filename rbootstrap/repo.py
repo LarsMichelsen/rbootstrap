@@ -190,6 +190,15 @@ class Repository(object):
         for pkg in needed_pkg_elems:
             add_with_required(pkg)
 
+        # Sort the needed_pkgs list (we want to have the packages listed in
+        # the packages distros list unpacked first)
+        def sorter(e):
+            try:
+                return needed.index(e[0])
+            except ValueError:
+                return 1
+        needed_pkgs.sort(key=sorter)
+
         return needed_pkgs
 
     def _tmp_path(self):

@@ -22,7 +22,7 @@
 # This distributions specification file is used for Fedora 20 at the moment
 
 def mirror():
-    return url('http://download.fedoraproject.org/pub/fedora/linux//releases/%(version)s/Fedora/%(arch)s/os/')
+    return url('http://download.fedoraproject.org/pub/fedora/linux/releases/%(version)s/Fedora/%(arch)s/os/')
 
 # URL to file containing the GPG key which is used to sign RPMs
 # (Set to None to disable import during setup)
