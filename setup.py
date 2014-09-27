@@ -48,6 +48,7 @@ setup(name='rbootstrap',
       data_files=[
           ('/usr/sbin', ['scripts/rbootstrap']),
           ('/usr/share/rbootstrap/distros', [ 'distros/' + f for f in os.listdir('distros')]),
-          ('/usr/share/doc/rbootstrap', ['LICENSE', 'README.md'])
+          ('/usr/share/doc/rbootstrap', ['LICENSE', 'README.md']),
+          ('/usr/share/man/man8', ['rbootstrap.8.gz']),
       ],
 )

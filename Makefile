@@ -10,6 +10,7 @@ help:
 	@echo "version - Update the version to be developed"
 
 dist:
+	gzip -fk rbootstrap.8
 	python setup.py sdist --owner=root --group=root
 	@echo "Created dist/rbootstrap-$(VERSION).tar.gz"
 
@@ -25,4 +26,4 @@ setversion:
 	sed -i "s/version='.*',/version='$(NEW_VERSION)',/g" setup.py
 
 clean:
-	rm -rf *.jail dist MANIFEST 2>/dev/null || true
+	rm -rf *.jail dist MANIFEST rbootstrap.8.gz 2>/dev/null || true

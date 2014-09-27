@@ -1,0 +1,116 @@
+.TH RBOOTSTRAP 8 2014-09-27
+.SH NAME
+rbootstrap \- Install RPM based Linux into Chroot Jails
+.SH SYNOPSIS
+.B rbootstrap
+.RB [ OPTION\&.\&.\&. ]
+.I CODENAME TARGET
+
+.SH DESCRIPTION
+.B rbootstrap
+is a tool for setting up the RPM based Linux distributions choosen by
+.I CODENAME
+in a chroot jails below the
+.I TARGET
+. The goal of the project is to have a tool like debootstrap for Debian and
+Ubuntu for RPM based distributions like CentOS, RedHat, OpenSuSE, SLES and so on.
+
+You can get a list of supported Linux distributions by executing \fBrbootstrap --list-codenames\fR.
+
+rbootstrap has been created to get a lightweight option for setting up virtual
+environments of Linux distributions. These environments, so called jails or
+chroots, can for example be used for setting up a build or packaging environment
+for these distributions.
+
+.SH "ARGUMENTS"
+.PP
+.IP  "\fICODENAME\fP"
+The codename specifies the Linux distribution and version to install. This must
+be a supported one. Use the command \fBrbootstrap \-\-list-codenames\fR to get
+the list of distros.
+.IP
+.IP  "\fITARGET\fP"
+Specifies the path to the target directory to create the chroot jail in.
+This path might already be existant.
+.IP
+
+.SH "OPTIONS"
+.PP
+.IP "\fB\-\-arch=ARCH\fP"
+Set the architecture to install (default: x86_64)
+The possible options depend on the architecures supported
+by the distribution to be installed into the jail. Most
+support "x86_64" and "i386".
+.IP
+.IP "\fB\-\-include=A,B,C\fP"
+The packages specified here will be installed using the
+package manager after the initial installation has been
+finished.
+.IP
+.IP "\fB\-\-exclude=A,B,C\fP"
+Remove these package names from the list of packages to
+be installed.
+.IP
+
+.PP
+.IP "\fB\-\-no-check-pkg-sig\fP"
+Do not verify that packages are signed with the GPG key
+retrieved from the repository. By default all packages
+are checked when installing them to the JAIL.
+.IP
+.IP "\fB\-\-pre-erase\fP"
+Completely clear all data in \fITARGET\fR before setting it up.
+When the jail is still used by mounted filesystems or
+running processes rbootstrap will terminate with an
+error message.
+If you like to perform a forced erasement, use the flag
+\fB\-\-force-erase\fR together with this option.
+
+\fIBE CAREFUL:\fR When you point \fITARGET\fR to another directory
+than the jail, the data below this directory will be
+removed anyways.
+.IP "\fB\-\-keep-pkgs\fP"
+Use this to make \fB--pre-erase\fR keep the downloaded
+packages. This is useful when you do not want to
+download already loaded packages again.
+.IP "\fB\-\-force-load-pkgs\fP"
+By default the locally existing packages are used
+when their checksums match the repositories metadata.
+This prevents duplicate downloading and might save time.
+You can use this flag to ignore all existing packages
+to download them again.
+
+.PP
+.IP "\fB\-\-mirror\fP"
+Use this mirror instead of the default mirror specified
+for the choosen distribution.
+.IP "\fB\-\-gpgkey\fP"
+Use this GPG key instead of the default one specified
+for the choosen distribution.
+
+.PP
+.IP "\fB\-\-list-codenames\fP"
+Prints out a list of supported Linux distributions
+.IP "\fB\-\-print-pkgs\fP"
+Print the packages to be installed, then exit
+.
+.IP "\fB\-V\fP, \fB\-\-version\fP"
+Print out version information
+.IP "\fB\-h\fP, \fB\-\-help\fP"
+Print the help screen
+
+.SH EXAMPLES
+.
+.PP
+To setup a \fICentOS 7.0\fR system below the path \fB/var/lib/centos_7.0_jail\fR
+use:
+.PP
+    rbootstrap centos_7.0 /var/lib/centos_7.0_jail
+
+.SH AUTHOR
+.B rbootstrap
+was written by Lars Michelsen <lm@larsmichelsen.com>.
+
+.SH BUGS
+
+Please report bugs using GitHub. You can find the project at https://github.com/LaMi-/rbootstrap.

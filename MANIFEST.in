@@ -1,3 +1,3 @@
-include rb distros/* rbootstrap/*.py
+include rb distros/* rbootstrap/*.py rbootstrap.8.gz
 include LICENSE README.md
 exclude *.jail

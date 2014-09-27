@@ -4,9 +4,7 @@ A collection of short notes on what to do one day.
 * Add support for distros
   * SLES
   * RedHat
-  * Fedora
 * Add some tests
-* Add man page
 * Add bash completion for distros
 * Add output or example to manpage which commands to
   use to use the chroot jail properly (mount, chroot, ...)
