@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import os
+import signal
 import shutil
 import subprocess
 
@@ -93,14 +94,43 @@ class Jail(object):
                 raise RBError('Failed to unmount %s' % path)
 
     def get_processes(self):
-        """ Returns a list of process ids which are currently using files within this jail. """
-        # FIXME
-        return []
+        """ Returns a dict of file paths located in the jail as keys and the
+        PIDs of the processes which are currently using these files. """
+        pids = list_dir('/proc')
+        open_files = {}
+        for pid in sorted(pids):
+            try:
+                int(pid)
+            except ValueError:
+                continue # Only care about process id folders
+
+            fd_path = os.path.join('/proc', pid, 'fd')
+            try:
+                fds = list_dir(fd_path)
+            except OSError:
+                continue
+
+            for fname in fds:
+                try:
+                    link = read_link(os.path.join(fd_path, fname))
+                except OSError:
+                    continue
+
+                if not link.startswith(self._path):
+                    continue # Only care about files within the jail
+
+                open_files.setdefault(link, []).append(int(pid))
+        return open_files
 
     def kill_processes(self, enforce = False):
         """ Tries to terminate all processes using files within this jail. """
-        # FIXME
-        pass
+        for path, pids in self.get_processes().items():
+            for pid in pids:
+                verbose('Sending SIGTERM to %d (Has %s opened)' % (pid, path))
+                if not enforce:
+                    os.kill(pid, signal.SIGTERM)
+                else:
+                    os.kill(pid, signal.SIGKILL)
 
     def erase(self):
         if not os.path.exists(self._path):
@@ -110,11 +140,11 @@ class Jail(object):
         if config.force_erase:
             self.cleanup() # Only cleanup resources when configured
 
-        if self.get_mounts():
-            raise RBError('Can not be erased. There are still file systems mounted within the jail.')
-
         if self.get_processes():
             raise RBError('Can not be erased. There are running processes using this jail.')
+
+        if self.get_mounts():
+            raise RBError('Can not be erased. There are still file systems mounted within the jail.')
 
         for thing in os.listdir(self._path):
             if config.keep_pkgs and thing == config.tmp_dir:

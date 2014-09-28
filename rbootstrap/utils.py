@@ -32,7 +32,16 @@ from . import config
 from .exceptions import *
 
 def read_file(path):
+    """Reads the content of a file from the jail"""
     return file(os.path.join(config.root, path[1:])).read()
+
+def read_link(path):
+    """Returns the target of a symlink located in the jail"""
+    return os.readlink(os.path.join(config.root, path[1:]))
+
+def list_dir(path):
+    """Lists the contents of a directory located in the jail"""
+    return os.listdir(os.path.join(config.root, path[1:]))
 
 def write_file(path, data, force = False):
     """ Write a file to the chroot (when file does not exist yet) """

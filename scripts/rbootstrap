@@ -208,10 +208,11 @@ def main():
 
         # Register final cleanup of the jail to be left as plain directory in all cases.
         atexit.register(JAIL.cleanup)
+        JAIL.init()
 
         if config.pre_erase:
             JAIL.erase()
-        JAIL.init()
+            JAIL.init()
 
     #
     # PHASE 2: Now access the package repository and use it to resolve all needed packages
