@@ -31,8 +31,12 @@ import traceback
 # during development instead of other versions installed somewhere
 if os.path.realpath(__file__).endswith('scripts/rbootstrap'):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    from rbootstrap import config
+    config.distro_path = 'distros'
+else:
+    from rbootstrap import config
 
-from rbootstrap import repo, jail, config, distro
+from rbootstrap import repo, jail, distro
 from rbootstrap.exceptions import *
 from rbootstrap.log import *
 

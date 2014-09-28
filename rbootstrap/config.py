@@ -31,9 +31,7 @@ mirror_path     = None
 gpgkey_path     = None
 root            = None
 tmp_dir         = 'rb.tmp' # must be within root
-# FIXME:
-#distro_path     = '/usr/share/rbootstrap/distros'
-distro_path     = 'distros'
+distro_path     = '/usr/share/rbootstrap/distros'
 pre_erase       = False
 force_erase     = False
 keep_pkgs       = False

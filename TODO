@@ -8,3 +8,9 @@ A collection of short notes on what to do one day.
 * Add bash completion for distros
 * Add output or example to manpage which commands to
   use to use the chroot jail properly (mount, chroot, ...)
+* create tool to execute commands within chroot "rbchroot"
+  * This tool manages different tasks like
+    * setting prompt
+    * checking mounts / doing mounts / cleaning up
+    * copy files like /etc/resolv.conf from host system
+* add option to replace files like uname, ldconfig

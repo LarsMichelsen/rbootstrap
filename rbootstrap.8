@@ -22,6 +22,11 @@ environments of Linux distributions. These environments, so called jails or
 chroots, can for example be used for setting up a build or packaging environment
 for these distributions.
 
+The setup copies \fB/etc/hostname\fR and \fB/etc/resolv.conf\fR from the host to the
+jail to make network communication possible. While setup the \fB/proc\fR and \fB/sys\fR
+filesystems of the host are mounted to the jail. After ending of rbootstrap these
+mounted filesystems are unmounted again.
+
 .SH "ARGUMENTS"
 .PP
 .IP  "\fICODENAME\fP"

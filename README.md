@@ -55,6 +55,10 @@ For example, to create a jail for CentOS 6.0 in the directory
 +- Cleaning up jail mounts and processes ---------------------------------------
 ```
 
+The setup copies `/etc/hostname` and `/etc/resolv.conf` from the host to the
+jail to make network communication possible. While setup the `/proc` and `/sys`
+filesystems of the host are mounted to the jail.
+
 After starting the command, rbootstrap does its work and, when no error happend,
 leaves the prepared jail in `/var/lib/centos_6.0_jail`. You can now use it
 for whatever you like. The most simple task would now be to change into the

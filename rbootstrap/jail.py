@@ -38,7 +38,7 @@ class Jail(object):
         """ Perform some initializations of the jail, for example creating
         device nodes below /dev or mount the /proc filesystem. """
         step('Initializing jail')
-        for d in [ 'dev', 'etc', 'proc' ]:
+        for d in [ 'dev', 'etc', 'proc', 'sys' ]:
             path = os.path.join(self._path, d)
             if not os.path.exists(path):
                 os.makedirs(path)
@@ -66,9 +66,12 @@ class Jail(object):
 
     def setup_proc(self):
         step('Mounting needed filesystems')
-        if subprocess.call('mount -t proc proc %s/proc' % self._path, shell = True) != 0:
+        verbose('Mounting /proc')
+        if subprocess.call('mount -t proc proc %s/proc' % self._path, shell=True) != 0:
             raise RBError('Failed to mount /proc to jail')
-        # FIXME: Maybe mount /sys
+        verbose('Mounting /sys')
+        if subprocess.call('mount -t sysfs sys %s/sys' % self._path, shell=True) != 0:
+            raise RBError('Failed to mount /sys to jail')
 
     def get_mounts(self):
         """ Returns a list of mountpoints mounted in the jail """
