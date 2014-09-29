@@ -25,8 +25,10 @@ and extracts the data from it.
 """
 
 import os
+import bz2
 import stat
 import zlib
+import struct
 import shutil
 import subprocess
 
@@ -41,10 +43,6 @@ except ImportError:
         has_lzma = False
 
 from .exceptions import *
-
-RPM_HEAD = '\xed\xab\xee\xdb'
-GZ_HEAD  = '\x1f\x8b'
-XZ_HEAD  = '\xfd7zXZ\x00'
 
 def cpio_align(pos):
     return pos + ((4 - (pos % 4)) % 4)
@@ -94,6 +92,9 @@ def extract_cpio(data, target_path):
 def unpack_gz(data):
     return zlib.decompress(data)
 
+def unpack_bz(data):
+    return bz2.decompress(data)
+
 def unpack_xz(data):
     if has_lzma:
         return xz.decompress(data)
@@ -107,25 +108,50 @@ def unpack_xz(data):
         return proc.communicate(input=data)[0]
 
 def unpack(rpm_file, target_path):
+    """Unpacks the contents of an RPM file to the given target path.
+
+    Information about extracting the CPIO data from the RPM has been
+    found in http://afb.users.sourceforge.net/centos/rpm2cpio.py.
+    """
     f = file(rpm_file, 'rb')
 
-    # Read full file header and check the first 4 bytes for the marker
-    if f.read(96)[:4] != RPM_HEAD:
+    head = f.read(96)
+    magic, major, minor = struct.unpack("!LBB", head[0:6])
+    if magic != 0xedabeedb:
         raise RBError('The file "%s" is no RPM file' % rpm_file)
+    if major not in [ 3, 4 ]:
+        raise RBError('The RPM file is of an invalid version (%d)' % major)
 
-    data = f.read()
+    head = f.read(16)
+    while True:
+        magic, ignore, sections, size_b = struct.unpack("!LLLL", head)
+        smagic, smagic2 = struct.unpack("!HL", head[0:6])
 
-    # Now try to find the used compression algorithm
-    uncompress_func = None
-    index = -1
-    for (head, func) in [ (GZ_HEAD, unpack_gz),
-                          (XZ_HEAD, unpack_xz) ]:
-        index = data.find(head)
-        if index != -1:
-            uncompress_func = func
+        if smagic == 0x1f8b:
+            uncompress_func = unpack_gz
+            break
+        elif smagic == 0x425a and (smagic2 & 0xff000000) == 0x68000000:
+            uncompress_func = unpack_bz
+            break
+        elif (smagic == 0xfd37 and smagic2 == 0x7a585a00) or magic != 0x8eade801:
+            uncompress_func = unpack_xz
+            break
+
+        # Advance to next part
+        f.read(16 * sections + size_b)
+        while True:
+            head = f.read(1)
+            if head == '':
+                raise RBError('No header found')
+            elif (0,) == struct.unpack("B", head):
+                continue
+            break
+        head += f.read(15)
+
+    data = head + f.read()
 
     if not uncompress_func:
         raise RBError('Unable to detect RPM compression')
 
-    cpio_data = uncompress_func(data[index:])
+    cpio_data = uncompress_func(data)
     extract_cpio(cpio_data, target_path)
