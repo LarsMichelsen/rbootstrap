@@ -95,8 +95,6 @@ to make it work. These are at the moment:
 
 * chroot
 * mount / umount
-* rpm2cpio
-* cpio
 
 I am trying to keep the dependencies as small as possible. Please let me know
 when you got easy solutions to remove one of the dependencies mentioned above.

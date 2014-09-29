@@ -23,7 +23,7 @@ import signal
 import shutil
 import subprocess
 
-from . import distro, config
+from . import distro, config, rpm
 from .log import *
 from .utils import *
 from .exceptions import *
@@ -50,8 +50,12 @@ class Jail(object):
         copy_file('/etc/resolv.conf')
         copy_file('/etc/hostname')
         self.setup_devices()
-        self.setup_proc()
         distro.execute_hooks('post_init')
+
+    def mount(self):
+        step('Mounting needed filesystems')
+        self.setup_proc()
+        self.setup_sys()
 
     def setup_devices(self):
         step('Creating device nodes')
@@ -66,10 +70,11 @@ class Jail(object):
         os.umask(old_umask)
 
     def setup_proc(self):
-        step('Mounting needed filesystems')
         verbose('Mounting /proc')
         if subprocess.call('mount -t proc proc %s/proc' % self._path, shell=True) != 0:
             raise RBError('Failed to mount /proc to jail')
+
+    def setup_sys(self):
         verbose('Mounting /sys')
         if subprocess.call('mount -t sysfs sys %s/sys' % self._path, shell=True) != 0:
             raise RBError('Failed to mount /sys to jail')
@@ -96,7 +101,11 @@ class Jail(object):
     def get_processes(self):
         """ Returns a dict of file paths located in the jail as keys and the
         PIDs of the processes which are currently using these files. """
-        pids = list_dir('/proc')
+        try:
+            pids = list_dir('/proc')
+        except OSError:
+            return {} # It is ok to have no /proc, do not do anything about this
+
         open_files = {}
         for pid in sorted(pids):
             try:
@@ -161,10 +170,10 @@ class Jail(object):
         adapt the installation mechanism, for example the pre/post scripts are missing. This
         is just needed to create a minimalistics system to be able to perform the chroot into
         and use the installer afterwards. """
-        # FIXME: Use python libs?
-        cmd = 'rpm2cpio %s | (cd %s ; cpio -dim --quiet)' % (pkg_path, self._path)
-        if subprocess.call(cmd, shell=True) != 0:
-            raise RBError('Failed to extract %s to jail' % pkg_path)
+        try:
+            rpm.unpack(pkg_path, self._path)
+        except Exception, e:
+            raise RBError('Failed to extract "%s": %s' % (pkg_path, e))
 
     def unpack(self, packages):
         step('Unpacking packages to create initial system')

@@ -240,6 +240,7 @@ def main():
     # PHASE 4: Perform regular installation of all components (replacing stuff of PHASE 2).
     #
 
+    JAIL.mount()
     JAIL.install(install_packages)
 
 try:
