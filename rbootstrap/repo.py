@@ -20,12 +20,9 @@
 
 import os
 import sys
-import urllib2
 import re
-import gzip
 import shutil
 import hashlib
-from StringIO import StringIO
 
 try:
     from xml.etree import cElementTree as elem_tree
@@ -34,29 +31,8 @@ except ImportError:
 
 from . import config
 from .log import *
+from .utils import fetch
 from .exceptions import *
-
-def fetch(path):
-    """ Either reads a requested file from the local system or a URL via http or ftp.
-        When the file path endswith .gz, the file is assumed to be gzipped and automatically
-        uncompressed. """
-
-    if path.startswith('http') or path.startswith('ftp'):
-        try:
-            response = urllib2.urlopen(path)
-        except urllib2.HTTPError, e:
-            # Want to have the URL in the exception str
-            e.msg += ' (%s)' % e.filename
-            raise
-    else:
-        response = file(path)
-
-    if path.endswith('.gz'):
-        # Would be better to be able to stream this, but it is not possible with python 2
-        fh = StringIO(response.read())
-        return gzip.GzipFile(fileobj = fh)
-
-    return response
 
 def ns(name, key):
     return '{http://linux.duke.edu/metadata/%s}%s' % (name, key)

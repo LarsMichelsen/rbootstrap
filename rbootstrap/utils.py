@@ -26,10 +26,35 @@ hook functions of the distro specifications.
 import os
 import pwd
 import grp
+import gzip
 import subprocess
+import urllib2
+from StringIO import StringIO
 
 from . import config
 from .exceptions import *
+
+def fetch(path):
+    """ Either reads a requested file from the local system or a URL via http or ftp.
+        When the file path endswith .gz, the file is assumed to be gzipped and automatically
+        uncompressed. """
+
+    if path.startswith('http') or path.startswith('ftp'):
+        try:
+            response = urllib2.urlopen(path)
+        except urllib2.HTTPError, e:
+            # Want to have the URL in the exception str
+            e.msg += ' (%s)' % e.filename
+            raise
+    else:
+        response = file(path)
+
+    if path.endswith('.gz'):
+        # Would be better to be able to stream this, but it is not possible with python 2
+        fh = StringIO(response.read())
+        return gzip.GzipFile(fileobj = fh)
+
+    return response
 
 def read_file(path):
     """Reads the content of a file from the jail"""

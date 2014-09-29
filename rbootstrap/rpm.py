@@ -100,6 +100,7 @@ def unpack_xz(data):
     else:
         # Now that the local python has no support for lzma,
         # fallback to command line tool
+        # FIXME: Add better error message in case xz is not available
         cmd = ['xz', '--decompress', '-f']
         proc = subprocess.Popen(cmd, stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE)
