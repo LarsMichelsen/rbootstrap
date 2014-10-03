@@ -121,7 +121,7 @@ def help(msg = None):
 
 def list_codenames():
     log('Supported Linux Distributions:\n%s\n' %
-       '\n'.join([ '    %s' % d for d in config.distros() ]))
+       '\n'.join([ '    %s' % d for d in sorted(config.distros()) ]))
     sys.exit(0)
 
 def parse_opts():
