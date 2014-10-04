@@ -24,7 +24,6 @@ import os
 import sys
 import glob
 import getopt
-import atexit
 import traceback
 
 # Needed for using the rbootstrap package directly from git repository
@@ -39,6 +38,9 @@ else:
 from rbootstrap import repo, jail, distro
 from rbootstrap.exceptions import *
 from rbootstrap.log import *
+
+JAIL = None
+REPO = None
 
 def version():
     return (
@@ -96,9 +98,9 @@ def help(msg = None):
         '                     This means:\n'
         '                     a) Killing all processes accessing files of the jail\n'
         '                     b) Unmounting all filesystems mounted in the jail\n'
-        '  --keep-pkgs        Use this to make "--pre-erase" keep the downloaded\n'
-        '                     packages. This is useful when you do not want to\n'
-        '                     download already loaded packages again.\n'
+        '  --keep-pkgs        Use this to let the installation and "--pre-erase"\n'
+        '                     keep the downloaded packages. This is useful when you\n'
+        '                     do not want to download already loaded packages again.\n'
         '  --force-load-pkgs  By default the locally existing packages are used\n'
         '                     when their checksums match the repositories metadata.\n'
         '                     This prevents duplicate downloading and might save time.\n'
@@ -190,11 +192,15 @@ def parse_opts():
 
     return options
 
-def cleanup(JAIL):
+def cleanup():
     step('Cleaning up jail mounts and processes')
-    JAIL.cleanup()
+    if JAIL:
+        JAIL.cleanup()
+    if REPO:
+        REPO.cleanup()
 
 def main():
+    global JAIL, REPO
     config.set_opts(parse_opts())
     config.load()
 
@@ -217,7 +223,6 @@ def main():
         JAIL = jail.Jail(config.root)
 
         # Register final cleanup of the jail to be left as plain directory in all cases.
-        atexit.register(cleanup, JAIL)
         JAIL.init()
 
         if config.pre_erase:
@@ -254,14 +259,43 @@ def main():
     JAIL.mount()
     JAIL.install(install_packages)
 
+    #
+    # FINISHED: Printing result and cleaning up
+    #
+
+    cleanup()
+
+    log(tty_bold + '+ ' + ('=' * 78) + tty_normal)
+    log(tty_bold + '| JAIL CREATED!' + tty_normal)
+    log(tty_bold + '+ ' + ('-' * 78) + tty_normal)
+    log(tty_bold + '| ' + tty_normal + 'You can now change to the jail using this command:')
+    log(tty_bold + '|' + tty_normal)
+    log(tty_bold + ('|   rbchroot %s' % config.root) + tty_normal)
+    log(tty_bold + '|' + tty_normal)
+    log(tty_bold + '|' + tty_normal
+        + ' If you just like to execute single commands without opening a shell in the\n'
+        + tty_bold + '|' + tty_normal
+        + ' jail, use the rbchroot command like this:')
+    log(tty_bold + '|' + tty_normal)
+    log(tty_bold + '|   rbchroot %s echo "I\'m jailed. Wheee!"' % config.root)
+    log(tty_bold + '|' + tty_normal)
+    log(tty_bold + '+ ' + ('=' * 78) + tty_normal)
+
 try:
     main()
 except BailOut, e:
     sys.stderr.write('%s. Terminating!\n' % e)
+    cleanup()
     sys.exit(1)
 except RBError, e:
     sys.stderr.write('ERROR: %s\n' % e)
+    cleanup()
+    sys.exit(1)
+except KeyboardInterrupt:
+    sys.stderr.write('(Terminated)\n')
+    cleanup()
     sys.exit(1)
 except Exception, e:
     sys.stderr.write('Unhandled exception: %s\n' % traceback.format_exc())
+    cleanup()
     sys.exit(1)

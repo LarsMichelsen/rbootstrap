@@ -234,3 +234,9 @@ class Repository(object):
             with open(target_path, 'wb') as fp:
                 verbose('Loading %s' % pkg_filename)
                 shutil.copyfileobj(fetch(pkg_path), fp)
+
+    def cleanup(self):
+        """Removes the temporary directory and all files within"""
+        step('Cleaning up downloaded files')
+        shutil.rmtree(os.path.join(config.root, config.tmp_dir))
+        return True
