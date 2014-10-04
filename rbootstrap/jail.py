@@ -44,16 +44,32 @@ class Jail(object):
             if not os.path.exists(path):
                 os.makedirs(path)
 
+        self.write_rb_info()
+
         chown('/', 'root', 'root', jailed=False)
 
         distro.execute_hooks('pre_init')
-        copy_file('/etc/resolv.conf')
-        copy_file('/etc/hostname')
+        self.init_name_resolution()
+        self.init_hostname()
         self.setup_devices()
         distro.execute_hooks('post_init')
 
+    def init_hostname(self):
+        if config.hostname != None:
+            write_file('/etc/hostname', config.hostname)
+        else:
+            copy_file('/etc/hostname')
+
+    def init_name_resolution(self):
+        """Copies resolv.conf from the host to the jail to make DNS lookups possible"""
+        copy_file('/etc/resolv.conf')
+
+    def write_rb_info(self):
+        write_file('/etc/rbootstrap.info',
+            'CODENAME="%s"\n'
+            'ARCH="%s"\n' % (config.codename, config.arch))
+
     def mount(self):
-        step('Mounting needed filesystems')
         self.setup_proc()
         self.setup_sys()
 
@@ -214,7 +230,6 @@ class Jail(object):
         """ Is executed to make the jail completely unused by the running system (remove
         all mounted filesystems and all processes using this jail. Then verify it and return
         either True or False depending on success """
-        step('Cleaning up jail mounts and processes')
         self.unmount()
         self.kill_processes()
 

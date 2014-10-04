@@ -77,6 +77,8 @@ def help(msg = None):
         '                     finished.\n'
         '  --exclude=A,B,C    Remove these package names from the list of packages to\n'
         '                     be installed\n'
+        '  --hostname=NAME    Changes the hostname of the chroot jail to this name.\n'
+        '                     By default the chroot uses the exact name of the host.\n'
         '\n'
         '  --no-check-pkg-sig Do not verify that packages are signed with the GPG key\n'
         '                     retrieved from the repository. By default all packages\n'
@@ -129,7 +131,7 @@ def parse_opts():
     long_options  = ['help', 'version', 'arch=', 'include=', 'exclude=', 'verbose',
                      'list-codenames', 'pre-erase', 'force-erase', 'keep-pkgs',
                      'force-load-pkgs', 'no-check-pkg-sig', 'mirror=', 'gpgkey=',
-                     'print-pkgs', ]
+                     'print-pkgs', 'hostname=', ]
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
     except getopt.GetoptError, e:
@@ -162,6 +164,8 @@ def parse_opts():
             options['force_load_pkgs'] = True
         elif k == '--print-pkgs':
             options['only_print_pkgs'] = True
+        elif k == '--hostname':
+            options['hostname'] = v
 
         elif k == '--list-codenames':
             list_codenames()
@@ -186,6 +190,10 @@ def parse_opts():
 
     return options
 
+def cleanup(JAIL):
+    step('Cleaning up jail mounts and processes')
+    JAIL.cleanup()
+
 def main():
     config.set_opts(parse_opts())
     config.load()
@@ -207,7 +215,7 @@ def main():
         JAIL = jail.Jail(config.root)
 
         # Register final cleanup of the jail to be left as plain directory in all cases.
-        atexit.register(JAIL.cleanup)
+        atexit.register(cleanup, JAIL)
         JAIL.init()
 
         if config.pre_erase:
@@ -240,6 +248,7 @@ def main():
     # PHASE 4: Perform regular installation of all components (replacing stuff of PHASE 2).
     #
 
+    step('Mounting needed filesystems')
     JAIL.mount()
     JAIL.install(install_packages)
 

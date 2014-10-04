@@ -19,12 +19,14 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import os
+import re
 import sys
 
 from .exceptions import *
 
 # Hardcoded default configuration which can be overwritten by configuration
 # files and/or command line options
+hostname        = None
 codename        = None
 arch            = 'x86_64'
 mirror_path     = None
@@ -52,6 +54,22 @@ def load():
     # Now resolve paths to really be absolute
     for key in [ 'root', 'distro_path' ]:
         globals()[key] = os.path.abspath(globals()[key])
+
+    # Validate some things
+    if hostname != None:
+        if not re.match('^[A-Z][A-Z0-9-]*', hostname, re.IGNORECASE):
+            raise BailOut('Invalid hostname provided')
+
+def load_rb_info():
+    """e.g. rbchroot has no information about the the distro codename and arch
+    provided by the user. The info is stored in chroot in /etc/rbootstrap.info,
+    read it from there"""
+    for l in file(os.path.join(root, 'etc/rbootstrap.info')):
+        key, val = l.strip().split('=', 1)
+        if key == 'CODENAME':
+            globals()['codename'] = val
+        elif key == 'ARCH':
+            globals()['arch'] = val
 
 def set_opts(options):
     global opts

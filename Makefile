@@ -22,8 +22,8 @@ version:
 
 setversion:
 	sed -ri 's/^(VERSION[[:space:]]*= *).*/\1'"$(NEW_VERSION)/" Makefile
-	sed -i "s/^VERSION = .*/VERSION = '$(NEW_VERSION)'/g" scripts/rbootstrap
+	sed -i "s/^VERSION = .*/VERSION = '$(NEW_VERSION)'/g" scripts/rbootstrap scripts/rbchroot
 	sed -i "s/version='.*',/version='$(NEW_VERSION)',/g" setup.py
 
 clean:
-	rm -rf *.jail dist MANIFEST rbootstrap.8.gz 2>/dev/null || true
+	rm -rf *.jail dist MANIFEST rbchroot.8.gz rbootstrap.8.gz 2>/dev/null || true

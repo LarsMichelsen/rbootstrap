@@ -47,6 +47,7 @@ setup(name='rbootstrap',
       packages=['rbootstrap'],
       data_files=[
           ('/usr/sbin', ['scripts/rbootstrap']),
+          ('/usr/sbin', ['scripts/rbchroot']),
           ('/usr/share/rbootstrap/distros', [ 'distros/' + f for f in os.listdir('distros')]),
           ('/usr/share/doc/rbootstrap', ['LICENSE', 'README.md']),
           ('/usr/share/man/man8', ['rbootstrap.8.gz']),
