@@ -203,6 +203,8 @@ def main():
     if os.geteuid() != 0:
         raise BailOut('rbootstrap needs to be run as root')
 
+    config.verify_needed_commands()
+
     if config.arch not in distro.supported_architectures():
         raise BailOut('The requested architecture %s is not supported by %s' %
                                                     (config.arch, config.codename))

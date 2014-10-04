@@ -21,6 +21,7 @@
 import os
 import re
 import sys
+import subprocess
 
 from .exceptions import *
 
@@ -90,3 +91,19 @@ def package_architectures():
         return ['x86_64', 'noarch']
     else:
         return ['i586', 'i686', 'noarch']
+
+def verify_needed_commands():
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    for cmd in [ 'mount', 'umount', 'chroot' ]:
+        found = False
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, cmd)
+            if is_exe(exe_file):
+                found = True
+                break
+
+        if not found:
+            raise BailOut('Your system misses the required command "%s"' % cmd)

@@ -26,6 +26,7 @@ import glob
 import getopt
 import atexit
 import traceback
+import subprocess
 
 # Needed for using the rbootstrap package directly from git repository
 # during development instead of other versions installed somewhere
@@ -39,7 +40,6 @@ else:
 from rbootstrap import repo, jail, distro
 from rbootstrap.exceptions import *
 from rbootstrap.log import *
-from rbootstrap.utils import execute_jailed
 
 def version():
     return (
@@ -130,6 +130,8 @@ def main():
     if os.geteuid() != 0:
         raise BailOut('rbchroot needs to be run as root')
 
+    config.verify_needed_commands()
+
     JAIL = jail.Jail(config.root)
     atexit.register(cleanup, JAIL)
     JAIL.init_name_resolution()
@@ -139,7 +141,8 @@ def main():
 
     cmd = ' '.join(config.cmd)
     verbose('Executing: chroot %s %s' % (config.root, cmd))
-    execute_jailed(cmd)
+    rc = subprocess.call('chroot %s %s' % (config.root, cmd), shell=True)
+    sys.exit(rc)
 
 try:
     main()

@@ -74,13 +74,17 @@ def install_packages(packages):
     execute_jailed('yum -y makecache ; yum -y install %s' % (' '.join(packages)))
 
 def yum_add_repo():
-    write_file('/etc/yum.repos.d/os.repo', '''[os]
-name=CentOS
+    s = '''[os]
+name=CentOS %s
 baseurl=%s
-gpgkey=%s
-gpgcheck=1 
 enabled=1
-''' % (mirror(), gpgkey()))
+''' % (config.distro_version(), mirror())
+    if gpgkey():
+        s += 'gpgcheck=1\n' \
+             'gpgkey=%s\n' % gpgkey()
+    else:
+        s += 'gpgcheck=0\n'
+    write_file('/etc/yum.repos.d/os.repo', s)
 
 def hook_post_unpack():
     yum_add_repo()
