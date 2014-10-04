@@ -19,12 +19,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import os
+import re
 import sys
+import subprocess
 
 from .exceptions import *
 
 # Hardcoded default configuration which can be overwritten by configuration
 # files and/or command line options
+hostname        = None
 codename        = None
 arch            = 'x86_64'
 mirror_path     = None
@@ -53,6 +56,22 @@ def load():
     for key in [ 'root', 'distro_path' ]:
         globals()[key] = os.path.abspath(globals()[key])
 
+    # Validate some things
+    if hostname != None:
+        if not re.match('^[A-Z][A-Z0-9-]*', hostname, re.IGNORECASE):
+            raise BailOut('Invalid hostname provided')
+
+def load_rb_info():
+    """e.g. rbchroot has no information about the the distro codename and arch
+    provided by the user. The info is stored in chroot in /etc/rbootstrap.info,
+    read it from there"""
+    for l in file(os.path.join(root, 'etc/rbootstrap.info')):
+        key, val = l.strip().split('=', 1)
+        if key == 'CODENAME':
+            globals()['codename'] = val.strip('"')
+        elif key == 'ARCH':
+            globals()['arch'] = val.strip('"')
+
 def set_opts(options):
     global opts
     opts = options
@@ -72,3 +91,19 @@ def package_architectures():
         return ['x86_64', 'noarch']
     else:
         return ['i586', 'i686', 'noarch']
+
+def verify_needed_commands():
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    for cmd in [ 'mount', 'umount', 'chroot' ]:
+        found = False
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, cmd)
+            if is_exe(exe_file):
+                found = True
+                break
+
+        if not found:
+            raise BailOut('Your system misses the required command "%s"' % cmd)

@@ -1,0 +1,157 @@
+#!/usr/bin/env python
+# encoding: utf-8
+#
+# rbootstrap - Install RPM based Linux into chroot jails
+# Copyright (C) 2014 Lars Michelsen <lm@larsmichelsen.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+VERSION = '0.1'
+
+import os
+import sys
+import glob
+import getopt
+import atexit
+import traceback
+import subprocess
+
+# Needed for using the rbootstrap package directly from git repository
+# during development instead of other versions installed somewhere
+if os.path.realpath(__file__).endswith('scripts/rbchroot'):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    from rbootstrap import config
+    config.distro_path = 'distros'
+else:
+    from rbootstrap import config
+
+from rbootstrap import repo, jail, distro
+from rbootstrap.exceptions import *
+from rbootstrap.log import *
+
+def version():
+    return (
+        'rbchroot (part of rbootstrap version %s)\n'
+        'Copyright (C) 2014 Lars Michelsen <lm@larsmichelsen.com>\n'
+        '\n'
+        'rbootstrap comes with ABSOLUTELY NO WARRANTY; for details take a look at the\n'
+        'LICENSE file. This is free software, and you are welcome to redistribute it\n'
+        'under certain conditions; for details take a look at the LICENSE file.\n' % VERSION
+    )
+
+def help(msg = None):
+    if msg:
+        sys.stderr.write('ERROR: %s\n' % msg)
+
+    sys.stdout.write(
+        'Usage: rbchroot [OPTION...] <TARGET> [CMD...]\n'
+        '\n'
+        'rbchroot is a program to execute commands within the context of a rbootstrap\n'
+        'chroot jail. It is just a small wrapper around the normal "chroot" command.\n'
+        '\n'
+        'Compared to a basic chroot it cares about some initialization and cleanup\n'
+        'tasks before and after execution of the requrested command.\n'
+        '\n'
+        'ARGUMENTS:\n'
+        '    TARGET           Specifies the path to the target directory to create the\n'
+        '                     chroot jail in. This path must be an existant chroot jail.\n'
+        '    CMD              Specify the command to be executed within the chroot jail.\n'
+        '                     When no command is given, a shell is opened.\n'
+        '\n'
+        'OPTIONS:\n'
+        '\n'
+        '  --verbose          Print out details about actions to stdout\n'
+        '\n'
+        '  -V, --version      Print out version information\n'
+        '  -h, --help         Print this help screen\n'
+        '\n'
+    )
+    sys.exit(0)
+
+def parse_opts():
+    short_options = ['hV']
+    long_options  = ['help', 'version', 'verbose', ]
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
+    except getopt.GetoptError, e:
+        raise RBError(str(e))
+
+    options = {}
+
+    for k, v in opts:
+        if k == '--verbose':
+            options['verbose'] = True
+
+        elif k in ['-V', '--version']:
+            sys.stdout.write(version())
+            sys.exit(0)
+
+        elif k in ['-h', '--help']:
+            sys.stdout.write(help())
+
+    num_args = len(args)
+    if num_args == 0:
+        help('Missing TARGET argument')
+    elif num_args == 1:
+        options['cmd'] = ''
+    else:
+        options['cmd']  = args[1:]
+
+    options['root'] = args[0]
+
+    return options
+
+def cleanup(JAIL):
+    verbose('Cleaning up jail mounts and processes')
+    JAIL.cleanup()
+
+def main():
+    config.set_opts(parse_opts())
+    config.load()
+    try:
+        config.load_rb_info()
+    except IOError:
+        raise BailOut('Does not seem to be a rbootstrap chroot')
+
+    distro.load(config.codename)
+
+    if os.geteuid() != 0:
+        raise BailOut('rbchroot needs to be run as root')
+
+    config.verify_needed_commands()
+
+    JAIL = jail.Jail(config.root)
+    atexit.register(cleanup, JAIL)
+    JAIL.init_name_resolution()
+
+    verbose('Mounting needed filesystems')
+    JAIL.mount()
+
+    cmd = ' '.join(config.cmd)
+    verbose('Executing: chroot %s %s' % (config.root, cmd))
+    rc = subprocess.call('chroot %s %s' % (config.root, cmd), shell=True)
+    sys.exit(rc)
+
+try:
+    main()
+except BailOut, e:
+    sys.stderr.write('%s. Terminating!\n' % e)
+    sys.exit(1)
+except RBError, e:
+    sys.stderr.write('ERROR: %s\n' % e)
+    sys.exit(1)
+except Exception, e:
+    sys.stderr.write('Unhandled exception: %s\n' % traceback.format_exc())
+    sys.exit(1)
