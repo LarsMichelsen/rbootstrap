@@ -67,9 +67,9 @@ def load_rb_info():
     for l in file(os.path.join(root, 'etc/rbootstrap.info')):
         key, val = l.strip().split('=', 1)
         if key == 'CODENAME':
-            globals()['codename'] = val
+            globals()['codename'] = val.strip('"')
         elif key == 'ARCH':
-            globals()['arch'] = val
+            globals()['arch'] = val.strip('"')
 
 def set_opts(options):
     global opts

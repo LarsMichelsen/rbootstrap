@@ -56,7 +56,7 @@ class Jail(object):
 
     def init_hostname(self):
         if config.hostname != None:
-            write_file('/etc/hostname', config.hostname)
+            write_file('/etc/hostname', config.hostname + '\n')
         else:
             copy_file('/etc/hostname')
 
