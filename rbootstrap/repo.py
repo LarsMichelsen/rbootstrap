@@ -48,7 +48,11 @@ class Repository(object):
         verbose('Repository: %s\nPackage Architectures: %s' %
                 (self._mirror_path, ', '.join(self._allowed_arch)))
 
-        self._get_primary_path()
+        try:
+            self._get_primary_path()
+        except IOError:
+            raise RBError('The given mirror path does not point to a valid '
+                          'repository (repodata/repomd.xml missing)')
         self._fetch_primary()
 
     def _get_primary_path(self):

@@ -112,6 +112,69 @@ in the `distros` directory to get the real list of supported ones.
 
 Maybe you can add one or two missing distributions? Would be appreciated!
 
+## Using DVDs or ISO images instead of package mirrors
+
+It is easily possible to use local installation media like a ISO image or
+an inserted DVD containing the installation files for the distro.
+
+Assuming you like to create a jail for CentOS 6.5 and have the installation
+DVD1 ISO file located in `/tmp/CentOS-6.5-x86_64-bin-DVD1.iso`. Now the
+easiest way to use this local file instead of a public HTTP mirror is to
+mount the ISO and point `rbootstrap` to this path.
+
+```
+> sudo -s
+# mkdir /media/tmp
+# mount -o loop /tmp/CentOS-6.5-x86_64-bin-DVD1.iso /media/tmp
+```
+
+Now you should see the contents of the ISO image below `/media/tmp`, for
+example a directory called `repodata`. Then call `rbootstrap as follows,
+watch the progress and enjoy.
+
+```
+# rbootstrap --mirror /media/tmp centos_6.5 /var/lib/centos_6.5.jail
++- Initializing jail -----------------------------------------------------------
++- Creating device nodes -------------------------------------------------------
++- Erasing existing jail -------------------------------------------------------
++- Initializing jail -----------------------------------------------------------
++- Creating device nodes -------------------------------------------------------
++- Reading repository meta information -----------------------------------------
++- Resolving package dependencies ----------------------------------------------
++- Loading repositories GPG key ------------------------------------------------
++- Loading packages ------------------------------------------------------------
++- Unpacking packages to create initial system ---------------------------------
++- Mounting needed filesystems -------------------------------------------------
++- Installing base packages ----------------------------------------------------
+(...)
++- Cleaning up jail mounts and processes ---------------------------------------
++- Cleaning up downloaded files ------------------------------------------------
++ ==============================================================================
+| JAIL CREATED!
++ ------------------------------------------------------------------------------
+| You can now change to the jail using this command:
+|
+|   rbchroot /var/lib/centos_6.5.jail
+|
+| If you just like to execute single commands without opening a shell in the
+| jail, use the rbchroot command like this:
+|
+|   rbchroot /var/lib/centos_6.5.jail echo "I'm jailed. Wheee!"
+|
++ ==============================================================================
+```
+
+And don't forget to cleanup after finishing this task:
+
+```
+# umount /media/tmp
+# rmdir /media/tmp
+```
+
+You can easily use a real DVD inserted into your computer. You only need to mount
+it (or find the mount point your OS auto mounted the disk to) and point `rbootstrap`
+to it.
+
 ## Reporting Bugs, Feature Requests
 
 I decided to use GitHub for managing project related communication, you
