@@ -43,8 +43,20 @@ def load(codename):
             raise BailOut('The distro "%s" does not specify the required key %s' %
                                                                     (codename, key))
 
+    if mirror_path() == None:
+        raise BailOut('Error: The requested distro does not ship with a default package mirror.\n\n'
+                      'Some enterprise distributions do not provide public mirrors for '
+                      'free use. You\nneed to either use a private repository and point '
+                      'rbootstrap to it (see \n--mirror and --gpgkey) or get an ISO image '
+                      'of the installation media of this\ndistribution, mount it and agan '
+                      'point rbootstrap to it\n(See README for details)')
+
+
 def supported_architectures():
-    return architectures
+    if type(architectures) == list:
+        return architectures
+    else:
+        return architectures()
 
 def needed_packages():
     return packages
@@ -57,7 +69,8 @@ def data_path():
 def mirror_path():
     if config.mirror_path:
         return config.mirror_path
-    return mirror()
+    if mirror != None:
+        return mirror()
 
 def gpgkey_path():
     if config.gpgkey_path:

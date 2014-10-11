@@ -54,10 +54,11 @@ packages = [
 ]
 
 # Possible architectures
-architectures = [
-    'x86_64',
-    'i386',
-]
+def architectures():
+    if config.distro_version().startswith('7.'):
+        return ['x86_64']
+    else:
+        return ['x86_64', 'i386']
 
 devices = [
     # name       perms              maj min usr grp
