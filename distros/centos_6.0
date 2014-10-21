@@ -51,6 +51,7 @@ def gpgkey():
 packages = [
     'filesystem', 'basesystem', 'setup',
     'rpm', 'yum', 'rootfiles', 'libselinux',
+    'centos-release',
 ]
 
 # Possible architectures
