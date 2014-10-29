@@ -43,7 +43,9 @@ check_pkg_sig   = True
 include         = []
 exclude         = []
 verbose         = False
+debug           = False
 only_print_pkgs = False
+create_repodata = True
 
 def load():
     """ Load the specified configuration file """
@@ -92,18 +94,18 @@ def package_architectures():
     else:
         return ['i586', 'i686', 'noarch']
 
-def verify_needed_commands():
+def find_command(cmd):
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
-    for cmd in [ 'mount', 'umount', 'chroot' ]:
-        found = False
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = path.strip('"')
-            exe_file = os.path.join(path, cmd)
-            if is_exe(exe_file):
-                found = True
-                break
+    for path in os.environ["PATH"].split(os.pathsep):
+        path = path.strip('"')
+        exe_file = os.path.join(path, cmd)
+        if is_exe(exe_file):
+            return True
+    return False
 
-        if not found:
+def verify_needed_commands():
+    for cmd in [ 'mount', 'umount', 'chroot' ]:
+        if not find_command(cmd):
             raise BailOut('Your system misses the required command "%s"' % cmd)

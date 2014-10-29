@@ -28,7 +28,7 @@ from .exceptions import *
 
 gpgkey = None
 
-def load(codename):
+def load(codename, require_mirror=True):
     try:
         execfile(os.path.join(config.distro_path, codename), globals(), globals())
     except IOError, e:
@@ -43,7 +43,7 @@ def load(codename):
             raise BailOut('The distro "%s" does not specify the required key %s' %
                                                                     (codename, key))
 
-    if mirror_path() == None:
+    if require_mirror and mirror_path() == None:
         raise BailOut('Error: The requested distro does not ship with a default package mirror.\n\n'
                       'Some enterprise distributions do not provide public mirrors for '
                       'free use. You\nneed to either use a private repository and point '

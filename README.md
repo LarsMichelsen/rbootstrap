@@ -106,6 +106,7 @@ At the moment there is support to install the following distributions in a chroo
 * OpenSUSE 13.1
 * CentOS 6.0 - 7.0
 * Fedora 18 - 20
+* SLES (SuSE Linux Enterprise Server) 11.0 - 12.0
 
 This list might not be always up-to-date, please take a look at the files
 in the `distros` directory to get the real list of supported ones.

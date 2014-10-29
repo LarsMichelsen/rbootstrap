@@ -95,6 +95,11 @@ set the URL to this mirror here. You can also configure
 a path on your local system, for example pointing to a
 path where an ISO image of the distribution is mounted
 to.
+.IP "\fB\-\-no-add-repodata"
+By default, when no repodata can be found for a mirror 
+rbootstrap tries to create this repodata. You have the 
+option to disable this feature to make rbootstrap 
+terminate when no repodata can be found.
 .IP "\fB\-\-gpgkey\fP"
 Use this GPG key instead of the default one specified
 for the choosen distribution.

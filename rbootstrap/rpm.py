@@ -79,7 +79,7 @@ def extract_cpio(data, target_path):
             if not os.path.exists(target):
                 os.mkdir(target, mode & 0o777)
         elif stat.S_ISLNK(mode):
-            if os.path.exists(target):
+            if os.path.lexists(target):
                 os.unlink(target)
             os.symlink(body, target)
         else:

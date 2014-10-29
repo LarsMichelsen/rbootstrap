@@ -125,7 +125,7 @@ def main():
     except IOError:
         raise BailOut('Does not seem to be a rbootstrap chroot')
 
-    distro.load(config.codename)
+    distro.load(config.codename, require_mirror=False)
 
     if os.geteuid() != 0:
         raise BailOut('rbchroot needs to be run as root')

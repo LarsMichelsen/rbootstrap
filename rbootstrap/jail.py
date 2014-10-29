@@ -189,6 +189,8 @@ class Jail(object):
         try:
             rpm.unpack(pkg_path, self._path)
         except Exception, e:
+            if config.debug:
+                raise
             raise RBError('Failed to extract "%s": %s' % (pkg_path, e))
 
     def unpack(self, packages):

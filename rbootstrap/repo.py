@@ -18,11 +18,14 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+# Handles RPM repositories in rpm-md format
+
 import os
 import sys
 import re
 import shutil
 import hashlib
+import tempfile
 
 try:
     from xml.etree import cElementTree as elem_tree
@@ -43,13 +46,21 @@ class Repository(object):
         self._data_path    = data_path
         self._gpgkey_path  = gpgkey_path
         self._allowed_arch = allowed_arch
+        self._tmp_md_path  = None
 
         step('Reading repository meta information')
         verbose('Repository: %s\nPackage Architectures: %s' %
                 (self._mirror_path, ', '.join(self._allowed_arch)))
 
         try:
-            self._get_primary_path()
+            try:
+                self._get_primary_path()
+            except IOError:
+                if config.create_repodata:
+                    self._create_repodata()
+                    self._get_primary_path()
+                else:
+                    raise
         except IOError:
             raise RBError('The given mirror path does not point to a valid '
                           'repository (repodata/repomd.xml missing)')
@@ -57,14 +68,27 @@ class Repository(object):
 
     def _get_primary_path(self):
         """ Parse the repomd.xml to get the path to the "primary" xml file """
-        md_path = os.path.join(self._data_path, 'repodata', 'repomd.xml')
+        if self._tmp_md_path:
+            basedir = self._tmp_md_path
+        else:
+            basedir = self._data_path
+
+        md_path = os.path.join(basedir, 'repodata', 'repomd.xml')
         for elem in elem_tree.parse(fetch(md_path)).getroot():
             if elem.get('type') == 'primary':
                 location = elem.find(ns('repo', 'location'))
-                self._primary_path = os.path.join(self._data_path, location.get('href'))
+                self._primary_path = os.path.join(basedir, location.get('href'))
                 return
 
         raise IOError('Unable to find primary info in "%s"' % md_path)
+
+    def _create_repodata(self):
+        if not config.find_command('createrepo'):
+            raise RBError('Unable to create missing repodata, because "createrepo" is missing. '
+                          'You can try to install createrepo and try this action again.')
+        self._tmp_md_path = tempfile.mkdtemp(prefix='rb_tmp_')
+        if os.system('createrepo -C -q --update -o %s %s' % (self._tmp_md_path, self._data_path)) >> 8 != 0:
+            raise RBError('Failed to create repodata using "createrepo"')
 
     def _fetch_primary(self):
         self._primary_root = elem_tree.parse(fetch(self._primary_path)).getroot()
@@ -243,4 +267,6 @@ class Repository(object):
         """Removes the temporary directory and all files within"""
         step('Cleaning up downloaded files')
         shutil.rmtree(os.path.join(config.root, config.tmp_dir))
+        if self._tmp_md_path:
+            shutil.rmtree(self._tmp_md_path)
         return True

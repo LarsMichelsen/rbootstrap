@@ -83,6 +83,7 @@ def copy_file(path):
 def call_jailed(handler, *args):
     """ Execute a python function "jailed". Means chroot into the jail path
     and unchroot afterwards """
+    cwd = os.getcwd()
     root = os.open('/', os.O_RDONLY)
     os.chroot(config.root)
     os.chdir('/')
@@ -91,7 +92,7 @@ def call_jailed(handler, *args):
 
     os.fchdir(root)
     os.chroot('.')
-    os.chdir('/')
+    os.chdir(cwd)
 
 def execute_jailed(cmd):
     """ Executes a command within the context of the jail """

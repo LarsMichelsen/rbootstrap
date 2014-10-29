@@ -107,7 +107,7 @@ def help(msg = None):
         '                     You can use this flag to ignore all existing packages\n'
         '                     to download them again.\n'
         '\n'
-        ' --mirror            Use this mirror instead of the default mirror specified\n'
+        '  --mirror           Use this mirror instead of the default mirror specified\n'
         '                     for the choosen distribution. Normally the default mirror\n'
         '                     points to a public accessible HTTP server. However, if\n'
         '                     you like to use another public or local mirror, you can\n'
@@ -115,10 +115,15 @@ def help(msg = None):
         '                     a path on your local system, for example pointing to a\n'
         '                     path where an ISO image of the distribution is mounted\n'
         '                     to.\n'
-        ' --gpgkey            Use this GPG key instead of the default one specified\n'
+        '  --no-add-repodata  By default, when no repodata can be found for a mirror\n'
+        '                     rbootstrap tries to create this repodata. You have the\n'
+        '                     option to disable this feature to make rbootstrap\n'
+        '                     terminate when no repodata can be found.\n'
+        '  --gpgkey           Use this GPG key instead of the default one specified\n'
         '                     for the choosen distribution.\n'
         '\n'
         '  --verbose          Print out details about actions to stdout\n'
+        '  --debug            Print full details about exceptions\n'
         '\n'
         '  --list-codenames   Prints out a list of supported Linux distributions\n'
         '  --print-pkgs       Print the packages to be installed, then exit\n'
@@ -136,10 +141,10 @@ def list_codenames():
 
 def parse_opts():
     short_options = ['hV']
-    long_options  = ['help', 'version', 'arch=', 'include=', 'exclude=', 'verbose',
+    long_options  = ['help', 'version', 'arch=', 'include=', 'exclude=', 'verbose', 'debug',
                      'list-codenames', 'pre-erase', 'force-erase', 'keep-pkgs',
                      'force-load-pkgs', 'no-check-pkg-sig', 'mirror=', 'gpgkey=',
-                     'print-pkgs', 'hostname=', ]
+                     'print-pkgs', 'hostname=', 'no-add-repodata', ]
     try:
         opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
     except getopt.GetoptError, e:
@@ -156,10 +161,14 @@ def parse_opts():
             options['exclude'] = v.split(',')
         elif k == '--mirror':
             options['mirror_path'] = v
+        elif k == '--no-add-repodata':
+            options['create_repodata'] = False
         elif k == '--gpgkey':
             options['gpgkey_path'] = v
         elif k == '--verbose':
             options['verbose'] = True
+        elif k == '--debug':
+            options['debug'] = True
         elif k == '--no-check-pkg-sig':
             options['check_pkg_sig'] = True
         elif k == '--pre-erase':
