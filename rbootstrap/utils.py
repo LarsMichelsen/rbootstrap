@@ -60,6 +60,10 @@ def read_file(path):
     """Reads the content of a file from the jail"""
     return file(os.path.join(config.root, path[1:])).read()
 
+def rm_file(path):
+    """Remove a file from the jail"""
+    os.unlink(os.path.join(config.root, path[1:]))
+
 def read_link(path):
     """Returns the target of a symlink located in the jail"""
     return os.readlink(os.path.join(config.root, path[1:]))

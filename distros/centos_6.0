@@ -49,9 +49,12 @@ def gpgkey():
 
 # Packages to install
 packages = [
+    # minimalistic
     'filesystem', 'basesystem', 'setup',
     'rpm', 'yum', 'rootfiles', 'libselinux',
     'centos-release',
+    # useful but not mandatory
+    'net-tools', 'util-linux-ng', 'tar', 'which',
 ]
 
 # Possible architectures
@@ -76,6 +79,11 @@ def install_packages(packages):
     execute_jailed('yum -y makecache ; yum -y install %s' % (' '.join(packages)))
 
 def yum_add_repo():
+    # remove default repositories
+    for f in list_dir('/etc/yum.repos.d'):
+        rm_file('/etc/yum.repos.d/' + f)
+
+    # Now add our own
     s = '''[os]
 name=CentOS %s
 baseurl=%s
