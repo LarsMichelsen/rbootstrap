@@ -39,6 +39,8 @@ packages = [
     # What we want
     'zypper', 'filesystem', 'module-init-tools', 'coreutils',
     'sles-release', 'suse-build-key', 'insserv', 'pwdutils',
+    # useful but not mandatory
+    'net-tools', 'tar', 'which', 'make',
 ]
 
 # Possible architectures
