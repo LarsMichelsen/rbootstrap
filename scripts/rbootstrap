@@ -29,9 +29,10 @@ import traceback
 # Needed for using the rbootstrap package directly from git repository
 # during development instead of other versions installed somewhere
 if os.path.realpath(__file__).endswith('scripts/rbootstrap'):
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    basedir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    sys.path.insert(0, basedir)
     from rbootstrap import config
-    config.distro_path = 'distros'
+    config.distro_path = basedir + '/' + 'distros'
 else:
     from rbootstrap import config
 

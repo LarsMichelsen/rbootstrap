@@ -2,7 +2,6 @@ A collection of short notes on what to do one day.
 
 * Handle multiple repositories
 * Add support for distros
-  * SLES
   * RedHat
 * Add some tests
 * Add bash completion for distros
