@@ -74,6 +74,13 @@ If you like to perform a forced erasement, use the flag
 \fIBE CAREFUL:\fR When you point \fITARGET\fR to another directory
 than the jail, the data below this directory will be
 removed anyways.
+.IP "\fB\-\-force-erase\fP"
+Use this to make \fB\-\-pre-erase\fR make the jail unused.
+This means:
+
+a) Killing all processes accessing files of the jail
+
+b) Unmounting all filesystems mounted in the jail
 .IP "\fB\-\-keep-pkgs\fP"
 Use this to make \fB--pre-erase\fR keep the downloaded
 packages. This is useful when you do not want to
