@@ -168,6 +168,12 @@ class Repository(object):
                 for entry in require_elements.findall(ns('rpm', 'entry')):
                     required = entry.get('name')
 
+                    # Do not care about these dependencies which do not seem to matter for
+                    # resolving the packages to be installed
+                    if required in [ 'rpmlib(CompressedFileNames)', 'rpmlib(PayloadFilesHavePrefix)',
+                                     'rpmlib(PartialHardlinkSets)', 'rpmlib(VersionedDependencies)', 'syslog' ]:
+                        continue
+
                     if required in already_provided:
                         continue # Do not search for already provided requirements
 
@@ -234,9 +240,12 @@ class Repository(object):
 
         try:
             try:
+                if csum_type == 'sha':
+                    csum_type = 'sha1'
                 h = hashlib.__dict__[csum_type]()
             except KeyError:
-                raise RBError('Hash algorithm "%s" not implemented' % csum_type)
+                raise RBError('Hash algorithm "%s" not implemented (available: %r)' %
+                                                   (csum_type, hashlib.__dict__.keys()))
 
             with open(target_path,'rb') as fp:
                 for chunk in iter(lambda: fp.read(8192), b''):
