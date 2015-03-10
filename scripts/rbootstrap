@@ -293,7 +293,7 @@ def main():
         + tty_bold + '|' + tty_normal
         + ' jail, use the rbchroot command like this:')
     log(tty_bold + '|' + tty_normal)
-    log(tty_bold + '|   rbchroot %s echo "I\'m jailed. Wheee!"' % config.root)
+    log(tty_bold + '|   rbchroot %s echo "I\\\'m jailed. Wheee!"' % config.root)
     log(tty_bold + '|' + tty_normal)
     log(tty_bold + '+ ' + ('=' * 78) + tty_normal)
 
