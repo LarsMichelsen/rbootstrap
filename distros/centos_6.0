@@ -29,7 +29,7 @@ def mirror():
     # Found no quick'n clever way to auto detect the versions which are either
     # available from mirror.centos.org or vault.centos.org. Please report if
     # you got a good idea.
-    if config.distro_version() == '6.6':
+    if config.distro_version() in [ '5.11', '6.6' ]:
         return url('http://mirror.centos.org/centos/%(version)s/os/%(arch)s/')
     elif config.distro_version() == '7.0':
         # For the moment, where only 7.0 has been released, the URL is only "7"
@@ -44,8 +44,10 @@ def mirror():
 def gpgkey():
     if config.distro_version().startswith('7.'):
         return mirror() + 'RPM-GPG-KEY-CentOS-7'
-    else:
+    elif config.distro_version().startswith('6.'):
         return mirror() + 'RPM-GPG-KEY-CentOS-6'
+    else:
+        return mirror() + 'RPM-GPG-KEY-CentOS-5'
 
 # Packages to install
 packages = [
