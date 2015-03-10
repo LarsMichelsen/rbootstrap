@@ -8,11 +8,16 @@ help:
 	@echo "dist    - Builds the release archive"
 	@echo "clean   - Cleans up the development directory"
 	@echo "version - Update the version to be developed"
+	@echo "install - Install to local system"
 
 dist:
-	gzip -fk rbootstrap.8
+	gzip -f -c rbootstrap.8 > rbootstrap.8.gz
 	python setup.py sdist --owner=root --group=root
 	@echo "Created dist/rbootstrap-$(VERSION).tar.gz"
+
+install:
+	gzip -f -c rbootstrap.8 > rbootstrap.8.gz
+	python setup.py install
 
 version:
 	@newversion=$$(dialog --stdout --inputbox "New Version:" 0 0 "$(VERSION)") ; \

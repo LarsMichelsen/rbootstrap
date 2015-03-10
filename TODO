@@ -10,3 +10,5 @@ A collection of short notes on what to do one day.
 * Add man page for rbchroot
 * Set prompt during init
 * add option to replace files like uname, ldconfig
+* Add tests which check the final distro for specific commands
+  which we define as essential, e.g. "hostname", "tar"

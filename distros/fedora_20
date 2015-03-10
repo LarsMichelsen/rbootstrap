@@ -41,7 +41,8 @@ def gpgkey():
 # Packages to install
 packages = [
     'filesystem', 'basesystem', 'setup',
-    'rpm', 'yum', 'rootfiles', 'libselinux',
+    'rpm', 'yum', 'rootfiles', 'libselinux', 'fedora-release',
+    'hostname', 'tar'
 ]
 
 # Possible architectures
