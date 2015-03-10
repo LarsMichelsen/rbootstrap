@@ -275,7 +275,7 @@ class Repository(object):
     def cleanup(self):
         """Removes the temporary directory and all files within"""
         step('Cleaning up downloaded files')
-        shutil.rmtree(os.path.join(config.root, config.tmp_dir))
+        shutil.rmtree(self._tmp_path())
         if self._tmp_md_path:
             shutil.rmtree(self._tmp_md_path)
         return True

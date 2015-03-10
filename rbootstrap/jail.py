@@ -206,7 +206,7 @@ class Jail(object):
         distro.execute_hooks('pre_install')
 
         if distro.gpgkey_path():
-            execute_jailed('rpm --import %s' % os.path.join(config.tmp_dir, 'gpg.key'))
+            execute_jailed('rpm --import %s' % os.path.join('/', config.tmp_dir, 'gpg.key'))
 
         # Now install the packages again to fix file permissions and make all pre/post
         # being executed

@@ -34,6 +34,9 @@ from StringIO import StringIO
 from . import config
 from .exceptions import *
 
+def quote_shell_string(s):
+    return "'" + s.replace("'", "'\"'\"'") + "'"
+
 def fetch(path):
     """ Either reads a requested file from the local system or a URL via http or ftp.
         When the file path endswith .gz, the file is assumed to be gzipped and automatically
@@ -100,7 +103,7 @@ def call_jailed(handler, *args):
 
 def execute_jailed(cmd):
     """ Executes a command within the context of the jail """
-    if subprocess.call('chroot %s %s' % (config.root, cmd), shell=True) != 0:
+    if subprocess.call('setarch %s chroot %s bash -l -c %s' % (config.arch, config.root, quote_shell_string(cmd)), shell=True) != 0:
         raise RBError('JAIL: Failed to execute: %s' % cmd)
 
 def _chown_jailed(path, user, group):
